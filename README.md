@@ -2,7 +2,7 @@
 
 AI Council VPS Healthcheck is the Phase 0 foundation for moving AI meeting-room monitoring, evidence collection, and recovery checks from Tanabe-san's editing PC to a VPS.
 
-This repository currently provides documentation, local healthcheck scripts, systemd units, and validation. It is not automation-complete. GitHub posting, secrets setup, and VPS execution are intentionally out of scope for this phase.
+This repository currently provides documentation, local healthcheck scripts, systemd units, and validation for Phase 0 only. GitHub posting, secrets setup, and VPS execution are intentionally out of scope for this phase.
 
 ## What Runs On The VPS
 
@@ -47,4 +47,3 @@ sudo journalctl -u ai-council-healthcheck.timer -n 100 --no-pager
 - Journal logs: `journalctl -u ai-council-healthcheck.service -n 100 --no-pager`
 - Latest report: `/var/log/ai-council/latest-report.md`
 - Installed scripts: `/opt/ai-council/scripts/`
-
