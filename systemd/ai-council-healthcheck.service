@@ -1,0 +1,8 @@
+[Unit]
+Description=AI Council healthcheck report
+Documentation=file:/opt/ai-council/docs/runbook.md
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/ai-council
+ExecStart=/opt/ai-council/scripts/report_status.sh

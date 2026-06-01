@@ -1,0 +1,11 @@
+[Unit]
+Description=Run AI Council healthcheck report daily
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+Unit=ai-council-healthcheck.service
+
+[Install]
+WantedBy=timers.target
+
