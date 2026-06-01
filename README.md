@@ -4,6 +4,8 @@ AI Council VPS Healthcheck is the Phase 0 foundation for moving AI meeting-room 
 
 This repository currently provides documentation, local healthcheck scripts, systemd units, and validation for Phase 0 only. GitHub posting, secrets setup, and VPS execution are intentionally out of scope for this phase.
 
+VPS operation is not confirmed until `/var/log/ai-council/latest-report.md` has been generated on the VPS.
+
 ## What Runs On The VPS
 
 - `scripts/healthcheck.sh` collects basic host, OS, disk, memory, command, and directory status.
@@ -13,10 +15,13 @@ This repository currently provides documentation, local healthcheck scripts, sys
 
 ## Initial Setup
 
-Run these commands manually on the Ubuntu VPS after reviewing this PR:
+Phase 0 assumes that this repository's files already exist on the VPS. The method for placing the repository on the VPS, such as a future `git clone` or file copy flow, is not implemented in Phase 0.
+
+The initial setup entry point is the directory that contains this `README.md` and `scripts/bootstrap_vps.sh`. After Tanabe-san reviews the PR and the repository contents are present on the VPS, run these commands manually from that directory:
 
 ```bash
-cd /path/to/ai-council
+test -f README.md
+test -f scripts/bootstrap_vps.sh
 sudo bash scripts/bootstrap_vps.sh
 ```
 
