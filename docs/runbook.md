@@ -112,6 +112,69 @@ sudo cat /var/log/ai-council/workspaces/latest-summary.md
 
 Use `sudo` because the summary writes to `/var/log/ai-council/workspaces/latest-summary.md`.
 
+## Phase 3 Operator And Job Inbox Recovery
+
+### Check Job Inbox
+
+```bash
+bash scripts/job_status.sh
+sudo ls -la /var/lib/ai-council/jobs/queue
+sudo ls -la /var/lib/ai-council/jobs/active
+sudo ls -la /var/lib/ai-council/jobs/done
+sudo ls -la /var/lib/ai-council/jobs/failed
+```
+
+Expected result: the command ends with `JOB_INBOX_STATUS: OK`, and only one job is in `active` at a time.
+
+### Create A Manual Job
+
+```bash
+bash scripts/create_job.sh repo_check <REPO_NAME>
+```
+
+If the queue directory is not writable by the current user, run the same command with `sudo`.
+
+### Run One Job Manually
+
+```bash
+sudo bash scripts/run_job_once.sh
+```
+
+Expected result: the command ends with `JOB_RUNNER_STATUS: OK`, `JOB_RUNNER_STATUS: ERROR`, or `JOB_RUNNER_STATUS: IDLE`.
+
+### Check Job Evidence
+
+```bash
+sudo cat /var/log/ai-council/jobs/latest-job-report.md
+sudo bash scripts/report_job_result.sh
+sudo cat /var/log/ai-council/jobs/latest-summary.md
+```
+
+Record the latest job ID, status, and log path in the GitHub Issue or PR before retrying a failed job.
+
+### Check Job Timer
+
+```bash
+sudo systemctl status ai-council-job-runner.timer
+sudo systemctl list-timers ai-council-job-runner.timer
+sudo journalctl -u ai-council-job-runner.service -n 100 --no-pager
+```
+
+The job timer is enabled manually after review:
+
+```bash
+sudo systemctl enable --now ai-council-job-runner.timer
+```
+
+### Smartphone Request Recovery
+
+If a smartphone request is missing, check:
+
+- GitHub Issues with the `vps-job` label from a browser or authenticated local machine
+- `bash scripts/job_status.sh` on the VPS
+
+GitHub-to-VPS automatic bridging and GitHub result posting are not confirmed by this package. Until that bridge exists, convert approved GitHub requests into local jobs with `scripts/create_job.sh`.
+
 ## GitHub Report Template
 
 ```md

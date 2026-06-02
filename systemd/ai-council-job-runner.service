@@ -1,0 +1,10 @@
+[Unit]
+Description=AI Council job runner
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/ai-council
+ExecStart=/opt/ai-council/scripts/run_job_once.sh
+

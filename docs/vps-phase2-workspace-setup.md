@@ -10,7 +10,7 @@ Create `/opt/ai-workspaces` and `/var/log/ai-council/workspaces` on the VPS so e
 - At PR creation time, VPS-side execution is unconfirmed.
 - Do not write GitHub tokens, SSH private keys, API keys, passwords, IP addresses, or personal usernames into this repository.
 - For private repos, start with a Mac-side ZIP download or manual file copy route.
-- Future GitHub SSH deploy keys or GitHub App access should be considered in Phase 3 or later.
+- Future GitHub SSH deploy keys or GitHub App access require a separate credentials design outside this repository.
 - This phase is workspace migration for checks and evidence, not AI model migration.
 
 ## First Target Repo Examples
