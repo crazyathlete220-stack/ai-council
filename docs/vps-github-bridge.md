@@ -17,7 +17,14 @@ This repository does not create GitHub tokens, SSH private keys, API keys, or se
 
 ## Issue Request Format
 
-For smartphone use, create an Issue from the `VPS Job Mobile` form. It applies the `vps-job` label automatically and includes the normal command:
+For smartphone use, create an Issue from the `VPS Job Casual` form. It applies the `vps-job` label automatically and accepts short Japanese requests:
+
+```text
+ai-councilの状態見て
+作業場まとめて
+```
+
+Use `VPS Job Mobile` when you want to edit the direct command:
 
 ```text
 JOB_TYPE=repo_check
@@ -30,6 +37,8 @@ Supported job types:
 
 - `repo_check`
 - `workspace_summary`
+
+Supported casual phrases are intentionally mapped only to those job types. Unsupported free text is skipped instead of being executed.
 
 One Issue creates one VPS job. To run another job, create another Issue.
 

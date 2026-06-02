@@ -20,11 +20,17 @@ Open GitHub on the smartphone, then:
 1. open `crazyathlete220-stack/ai-council`
 2. open `Issues`
 3. tap `New issue`
-4. choose `VPS Job Mobile`
-5. leave the default command unchanged for the normal check
+4. choose `VPS Job Casual`
+5. leave `ai-councilの状態見て` unchanged for the normal check
 6. submit the Issue
 
-Default command:
+The casual form turns this request:
+
+```text
+ai-councilの状態見て
+```
+
+into the safe VPS job:
 
 ```text
 JOB_TYPE=repo_check
@@ -32,6 +38,8 @@ REPO_NAME=ai-council
 ```
 
 The Issue template applies the `vps-job` label automatically. The bridge only imports Issues with that label.
+
+Use `VPS Job Mobile` instead when you want to edit `JOB_TYPE` and `REPO_NAME` directly.
 
 ## Confirm The Result
 
@@ -57,7 +65,14 @@ Repo Path: /opt/ai-workspaces/ai-council
 
 ## Other Supported Request
 
-Workspace summary:
+Casual workspace summary examples:
+
+```text
+作業場まとめて
+ワークスペース一覧見て
+```
+
+Direct command:
 
 ```text
 JOB_TYPE=workspace_summary
@@ -71,8 +86,7 @@ Create one Issue per job. To run the same job again, create a new Issue.
 Wait up to ten minutes, then check the Issue:
 
 - label includes `vps-job`
-- command includes `JOB_TYPE=repo_check`
-- command includes `REPO_NAME=ai-council`
+- request says `ai-councilの状態見て`, `ai-councilをチェックして`, `作業場まとめて`, or uses direct `JOB_TYPE` lines
 - no passwords, tokens, SSH private keys, API keys, or other secrets were included
 
 If the Issue still has no result comment, check the VPS:

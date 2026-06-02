@@ -170,9 +170,9 @@ sudo systemctl enable --now ai-council-job-runner.timer
 
 If a smartphone request is missing, check:
 
-- the requester used the `VPS Job Mobile` Issue form
+- the requester used the `VPS Job Casual` or `VPS Job Mobile` Issue form
 - GitHub Issues with the `vps-job` label from a browser or authenticated local machine
-- the Issue body includes `JOB_TYPE=repo_check` and `REPO_NAME=ai-council`
+- the Issue body includes a supported casual phrase such as `ai-councilの状態見て` or direct `JOB_TYPE=repo_check` and `REPO_NAME=ai-council`
 - the Issue has no passwords, tokens, SSH private keys, API keys, or other secrets
 - `bash scripts/job_status.sh` on the VPS
 

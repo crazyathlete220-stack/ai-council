@@ -64,7 +64,7 @@ Operator confirmation is based on `/var/log/ai-council/jobs/latest-job-report.md
 
 The GitHub bridge lets a smartphone-created Issue with the `vps-job` label become a VPS job. It requires `gh` to be installed and authenticated on the VPS, but this repository does not create or store GitHub tokens or secrets.
 
-For smartphone requests, start from [docs/mobile-vps-jobs.md](docs/mobile-vps-jobs.md) and use the `VPS Job Mobile` Issue form.
+For smartphone requests, start from [docs/mobile-vps-jobs.md](docs/mobile-vps-jobs.md) and use the `VPS Job Casual` Issue form for short Japanese requests. Use `VPS Job Mobile` when you want direct `JOB_TYPE` fields.
 
 For VPS operations, start from [docs/vps-github-bridge.md](docs/vps-github-bridge.md).
 
