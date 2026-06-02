@@ -6,8 +6,9 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 WorkingDirectory=/opt/ai-council
+Environment=HOME=/root
+Environment=XDG_CONFIG_HOME=/root/.config
 ExecStart=/opt/ai-council/scripts/import_github_jobs.sh
 ExecStart=/opt/ai-council/scripts/run_job_once.sh
 ExecStart=/opt/ai-council/scripts/report_job_result.sh
 ExecStart=/opt/ai-council/scripts/post_job_result_to_github.sh
-
