@@ -228,6 +228,32 @@ The bridge timer is enabled manually after `gh auth status` succeeds:
 sudo systemctl enable --now ai-council-github-bridge.timer
 ```
 
+## AI Worker Plan Recovery
+
+### Create A Manual Plan Job
+
+```bash
+bash /opt/ai-council/scripts/create_job.sh ai_plan ai-council
+sudo bash /opt/ai-council/scripts/run_job_once.sh
+sudo bash /opt/ai-council/scripts/report_job_result.sh
+```
+
+Expected result:
+
+```text
+AI_PLAN_STATUS: OK
+JOB_RUNNER_STATUS: OK
+```
+
+### Check AI Plan Evidence
+
+```bash
+sudo cat /var/log/ai-council/ai-worker/latest-plan.md
+sudo grep -E "AI_PLAN_STATUS|JOB_RUNNER_STATUS|Plan File|Latest Plan" /var/log/ai-council/jobs/latest-job-report.md
+```
+
+`ai_plan` is planning only. It does not edit files, run build/test/install commands, push branches, or create PRs.
+
 ## GitHub Report Template
 
 ```md

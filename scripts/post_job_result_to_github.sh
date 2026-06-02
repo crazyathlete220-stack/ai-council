@@ -51,7 +51,7 @@ body="$(
   {
     echo "## VPS job result"
     echo
-    grep -E "Generated At|Job ID|Job Type|Repo Name|Repo Path|REPO_CHECK_STATUS|WORKSPACE_SUMMARY_STATUS|JOB_RUNNER_STATUS" "${LATEST_REPORT}" || true
+    grep -E "Generated At|Job ID|Job Type|Repo Name|Repo Path|Plan File|Latest Plan|REPO_CHECK_STATUS|WORKSPACE_SUMMARY_STATUS|AI_PLAN_STATUS|JOB_RUNNER_STATUS" "${LATEST_REPORT}" || true
     echo
     echo "Evidence:"
     echo "- VPS latest job report: ${LATEST_REPORT}"
@@ -68,4 +68,3 @@ gh issue comment "${issue_number}" --repo "${REPOSITORY}" --body "${body}" >/dev
 
 echo "Posted job result for ${job_id} to Issue #${issue_number}"
 echo "GITHUB_JOB_POST_STATUS: OK"
-

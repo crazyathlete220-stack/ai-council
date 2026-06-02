@@ -37,8 +37,9 @@ Supported job types:
 
 - `repo_check`
 - `workspace_summary`
+- `ai_plan`
 
-Supported casual phrases are intentionally mapped only to those job types. Unsupported free text is skipped instead of being executed.
+Supported casual phrases are intentionally mapped only to those job types. Phrases with `計画`, `方針`, `plan`, or `プラン` map to `ai_plan`. Unsupported free text is skipped instead of being executed.
 
 One Issue creates one VPS job. To run another job, create another Issue.
 

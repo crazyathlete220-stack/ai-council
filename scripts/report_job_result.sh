@@ -17,7 +17,7 @@ mkdir -p "${LOG_DIR}"
 
   if [[ -r "${LATEST_REPORT}" ]]; then
     echo "## Latest Job Signals"
-    grep -E "Generated At|Job ID|Job Type|Repo Name|JOB_RUNNER_STATUS|REPO_CHECK_STATUS|WORKSPACE_SUMMARY_STATUS" "${LATEST_REPORT}" || true
+    grep -E "Generated At|Job ID|Job Type|Repo Name|Plan File|Latest Plan|JOB_RUNNER_STATUS|REPO_CHECK_STATUS|WORKSPACE_SUMMARY_STATUS|AI_PLAN_STATUS" "${LATEST_REPORT}" || true
   else
     echo "## Latest Job Signals"
     echo "- latest-job-report.md: not found"
@@ -26,4 +26,3 @@ mkdir -p "${LOG_DIR}"
   echo
   echo "JOB_REPORT_STATUS: OK"
 } | tee "${SUMMARY_FILE}"
-
