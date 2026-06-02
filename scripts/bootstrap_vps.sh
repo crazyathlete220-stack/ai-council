@@ -40,6 +40,7 @@ DOC_FILES=(
   "vps-ai-operator.md"
   "vps-job-inbox.md"
   "vps-github-bridge.md"
+  "mobile-vps-jobs.md"
 )
 
 SCRIPT_FILES=(
