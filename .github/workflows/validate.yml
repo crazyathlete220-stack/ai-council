@@ -19,3 +19,10 @@ jobs:
           test -f README.md
           test -f docs/vps-operations.md
           test -f docs/runbook.md
+          test -f docs/vps-workspace-operations.md
+          test -f docs/vps-phase2-workspace-setup.md
+          test -f scripts/setup_workspaces.sh
+          test -f scripts/register_workspace.sh
+          test -f scripts/workspace_status.sh
+          test -f scripts/run_repo_check.sh
+          test -f scripts/report_workspaces.sh
