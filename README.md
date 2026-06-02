@@ -60,6 +60,28 @@ sudo systemctl status ai-council-job-runner.timer
 
 Operator confirmation is based on `/var/log/ai-council/jobs/latest-job-report.md` being generated on the VPS. GitHub-to-VPS automatic bridging and GitHub result posting remain unconfirmed until credentials and the bridge are configured outside this repository.
 
+## GitHub Issue Bridge
+
+The GitHub bridge lets a smartphone-created Issue with the `vps-job` label become a VPS job. It requires `gh` to be installed and authenticated on the VPS, but this repository does not create or store GitHub tokens or secrets.
+
+Start from [docs/vps-github-bridge.md](docs/vps-github-bridge.md).
+
+Manual bridge commands on the VPS:
+
+```bash
+sudo bash scripts/import_github_jobs.sh
+sudo bash scripts/run_job_once.sh
+sudo bash scripts/report_job_result.sh
+sudo bash scripts/post_job_result_to_github.sh
+```
+
+Timer-based bridge processing remains manual until reviewed:
+
+```bash
+sudo systemctl enable --now ai-council-github-bridge.timer
+sudo systemctl status ai-council-github-bridge.timer
+```
+
 ## Verification Commands
 
 ```bash
@@ -80,6 +102,7 @@ sudo cat /var/log/ai-council/jobs/latest-job-report.md
 sudo journalctl -u ai-council-healthcheck.service -n 100 --no-pager
 sudo journalctl -u ai-council-healthcheck.timer -n 100 --no-pager
 sudo journalctl -u ai-council-job-runner.service -n 100 --no-pager
+sudo journalctl -u ai-council-github-bridge.service -n 100 --no-pager
 ```
 
 ## Where To Look When It Stops
@@ -94,3 +117,5 @@ sudo journalctl -u ai-council-job-runner.service -n 100 --no-pager
 - Operator setup: `docs/vps-ai-operator.md`
 - Job inbox: `/var/lib/ai-council/jobs/`
 - Job reports: `/var/log/ai-council/jobs/`
+- GitHub bridge: `docs/vps-github-bridge.md`
+- GitHub bridge state: `/var/lib/ai-council/github-bridge/`

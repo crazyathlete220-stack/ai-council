@@ -173,7 +173,55 @@ If a smartphone request is missing, check:
 - GitHub Issues with the `vps-job` label from a browser or authenticated local machine
 - `bash scripts/job_status.sh` on the VPS
 
-GitHub-to-VPS automatic bridging and GitHub result posting are not confirmed by this package. Until that bridge exists, convert approved GitHub requests into local jobs with `scripts/create_job.sh`.
+If the GitHub bridge is not configured yet, convert approved GitHub requests into local jobs with `scripts/create_job.sh`.
+
+## GitHub Bridge Recovery
+
+### Check GitHub CLI
+
+```bash
+command -v gh
+gh auth status --hostname github.com
+```
+
+If either command fails, the bridge reports `AUTH_REQUIRED`. Configure GitHub authentication outside this repository.
+
+### Import GitHub Jobs
+
+```bash
+sudo bash scripts/import_github_jobs.sh
+```
+
+Expected result: `GITHUB_JOB_IMPORT_STATUS: OK`, `NO_MATCHING_ISSUES`, or `AUTH_REQUIRED`.
+
+### Post Latest Job Result
+
+```bash
+sudo bash scripts/post_job_result_to_github.sh
+```
+
+Expected result: `GITHUB_JOB_POST_STATUS: OK`, `ALREADY_POSTED`, `NO_ISSUE_SOURCE`, `NO_REPORT`, or `AUTH_REQUIRED`.
+
+### Check Bridge State
+
+```bash
+sudo ls -la /var/lib/ai-council/github-bridge/imported
+sudo ls -la /var/lib/ai-council/github-bridge/posted
+sudo journalctl -u ai-council-github-bridge.service -n 100 --no-pager
+```
+
+### Check Bridge Timer
+
+```bash
+sudo systemctl status ai-council-github-bridge.timer
+sudo systemctl list-timers ai-council-github-bridge.timer
+```
+
+The bridge timer is enabled manually after `gh auth status` succeeds:
+
+```bash
+sudo systemctl enable --now ai-council-github-bridge.timer
+```
 
 ## GitHub Report Template
 
