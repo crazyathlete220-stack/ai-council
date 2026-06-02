@@ -27,6 +27,14 @@ sudo bash scripts/bootstrap_vps.sh
 
 The bootstrap script installs minimum packages, creates `/opt/ai-council` and `/var/log/ai-council`, copies the repository files into `/opt/ai-council`, installs the systemd service and timer, and prints the next confirmation commands.
 
+## Phase 2 Workspace
+
+Phase 2 prepares the VPS as an AI work area for repository checks. The workload moved away from the PC is build, test, lint, status checks, and log generation. It is not an AI model migration.
+
+Start from [docs/vps-phase2-workspace-setup.md](docs/vps-phase2-workspace-setup.md), then use [docs/vps-workspace-operations.md](docs/vps-workspace-operations.md) as the operations guide.
+
+Workspace confirmation is based on `sudo bash scripts/run_repo_check.sh <REPO_NAME>` generating `/var/log/ai-council/workspaces/<REPO_NAME>/latest-report.md` on the VPS.
+
 ## Verification Commands
 
 ```bash
@@ -52,3 +60,5 @@ sudo journalctl -u ai-council-healthcheck.timer -n 100 --no-pager
 - Journal logs: `journalctl -u ai-council-healthcheck.service -n 100 --no-pager`
 - Latest report: `/var/log/ai-council/latest-report.md`
 - Installed scripts: `/opt/ai-council/scripts/`
+- Workspace setup: `docs/vps-phase2-workspace-setup.md`
+- Workspace reports: `/var/log/ai-council/workspaces/`
