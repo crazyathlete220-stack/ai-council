@@ -96,11 +96,11 @@ sudo bash scripts/report_job_result.sh
 1. Open GitHub from the smartphone.
 2. Create an Issue using `.github/ISSUE_TEMPLATE/vps-job.md`.
 3. Fill in `JOB_TYPE` and `REPO_NAME`.
-4. An AI operator or future bridge converts the Issue into a VPS queue job.
+4. `scripts/import_github_jobs.sh` converts the Issue into a VPS queue job when `gh` is authenticated on the VPS.
 5. The VPS runner creates `/var/log/ai-council/jobs/latest-job-report.md`.
-6. The result is pasted back to the Issue or PR by a human or future GitHub bridge.
+6. `scripts/post_job_result_to_github.sh` can paste the result back to the Issue when `gh` is authenticated on the VPS.
 
-This phase creates the safe inbox and execution package. It does not store GitHub credentials or post results back to GitHub automatically.
+This phase creates the safe inbox and execution package. GitHub authentication stays outside this repository.
 
 ## Safety Rules
 

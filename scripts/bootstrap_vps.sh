@@ -7,6 +7,8 @@ SERVICE_NAME="ai-council-healthcheck.service"
 TIMER_NAME="ai-council-healthcheck.timer"
 JOB_SERVICE_NAME="ai-council-job-runner.service"
 JOB_TIMER_NAME="ai-council-job-runner.timer"
+GITHUB_BRIDGE_SERVICE_NAME="ai-council-github-bridge.service"
+GITHUB_BRIDGE_TIMER_NAME="ai-council-github-bridge.timer"
 
 if [[ "${EUID}" -ne 0 ]]; then
   echo "ERROR: Run this script as root, for example: sudo bash scripts/bootstrap_vps.sh" >&2
@@ -37,6 +39,7 @@ DOC_FILES=(
   "vps-phase2-workspace-setup.md"
   "vps-ai-operator.md"
   "vps-job-inbox.md"
+  "vps-github-bridge.md"
 )
 
 SCRIPT_FILES=(
@@ -52,6 +55,8 @@ SCRIPT_FILES=(
   "run_job_once.sh"
   "job_status.sh"
   "report_job_result.sh"
+  "import_github_jobs.sh"
+  "post_job_result_to_github.sh"
 )
 
 SYSTEMD_FILES=(
@@ -59,6 +64,8 @@ SYSTEMD_FILES=(
   "${TIMER_NAME}"
   "${JOB_SERVICE_NAME}"
   "${JOB_TIMER_NAME}"
+  "${GITHUB_BRIDGE_SERVICE_NAME}"
+  "${GITHUB_BRIDGE_TIMER_NAME}"
 )
 
 for doc_file in "${DOC_FILES[@]}"; do
@@ -94,4 +101,9 @@ Phase 3 operator commands, after review:
   sudo bash ${APP_DIR}/scripts/run_job_once.sh
   sudo bash ${APP_DIR}/scripts/report_job_result.sh
   sudo systemctl enable --now ${JOB_TIMER_NAME}
+
+GitHub bridge commands, after gh authentication is configured on the VPS:
+  sudo bash ${APP_DIR}/scripts/import_github_jobs.sh
+  sudo bash ${APP_DIR}/scripts/post_job_result_to_github.sh
+  sudo systemctl enable --now ${GITHUB_BRIDGE_TIMER_NAME}
 EOF

@@ -1,0 +1,12 @@
+[Unit]
+Description=Run AI Council GitHub Issue bridge periodically
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=5min
+Persistent=true
+Unit=ai-council-github-bridge.service
+
+[Install]
+WantedBy=timers.target
+
