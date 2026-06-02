@@ -11,6 +11,27 @@ MAX_ISSUES="${AI_COUNCIL_GITHUB_IMPORT_LIMIT:-20}"
 
 mkdir -p "${IMPORT_DIR}" "${LOG_DIR}"
 
+derive_casual_job() {
+  local request_text="$1"
+  local request_text_lc=""
+
+  request_text_lc="$(printf "%s" "${request_text}" | tr "[:upper:]" "[:lower:]")"
+
+  if printf "%s" "${request_text_lc}" | grep -Eq "workspace_summary|作業場|ワークスペース|workspace|一覧|まとめ|サマリー"; then
+    job_type="workspace_summary"
+    repo_name="all"
+    return 0
+  fi
+
+  if printf "%s" "${request_text_lc}" | grep -Eq "repo_check|ai-council|状態|確認|チェック|ヘルス|health|repo|リポジトリ"; then
+    job_type="repo_check"
+    repo_name="ai-council"
+    return 0
+  fi
+
+  return 1
+}
+
 if ! command -v gh >/dev/null 2>&1; then
   echo "GITHUB_JOB_IMPORT_STATUS: AUTH_REQUIRED"
   echo "Reason: gh command is not installed on the VPS."
@@ -43,6 +64,7 @@ skipped_count=0
 for row in $(printf "%s" "${issues_json}" | jq -r '.[] | @base64'); do
   issue_json="$(printf "%s" "${row}" | base64 -d)"
   issue_number="$(printf "%s" "${issue_json}" | jq -r '.number')"
+  issue_title="$(printf "%s" "${issue_json}" | jq -r '.title // ""')"
   issue_body="$(printf "%s" "${issue_json}" | jq -r '.body // ""')"
   issue_author="$(printf "%s" "${issue_json}" | jq -r '.author.login // "unknown"')"
   imported_marker="${IMPORT_DIR}/issue-${issue_number}.imported"
@@ -54,6 +76,14 @@ for row in $(printf "%s" "${issues_json}" | jq -r '.[] | @base64'); do
 
   job_type="$(printf "%s\n" "${issue_body}" | awk -F= '/^JOB_TYPE=/{print $2; exit}' | tr -d '[:space:]')"
   repo_name="$(printf "%s\n" "${issue_body}" | awk -F= '/^REPO_NAME=/{print $2; exit}' | tr -d '[:space:]')"
+  request_mode="explicit"
+
+  if [[ -z "${job_type}" ]]; then
+    if derive_casual_job "${issue_title}
+${issue_body}"; then
+      request_mode="casual"
+    fi
+  fi
 
   case "${job_type}" in
     repo_check)
@@ -92,6 +122,7 @@ for row in $(printf "%s" "${issues_json}" | jq -r '.[] | @base64'); do
     echo "JOB_ID=${job_id}"
     echo "JOB_TYPE=${job_type}"
     echo "REPO_NAME=${repo_name}"
+    echo "REQUEST_MODE=${request_mode}"
     echo "IMPORTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
   } > "${imported_marker}"
 
@@ -103,4 +134,3 @@ done
 echo "Imported: ${imported_count}"
 echo "Skipped: ${skipped_count}"
 echo "GITHUB_JOB_IMPORT_STATUS: OK"
-

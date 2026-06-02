@@ -1,0 +1,41 @@
+name: VPS Job Casual
+description: Send a short Japanese request to the VPS
+title: "[VPS Job] ai-councilの状態見て"
+labels:
+  - vps-job
+body:
+  - type: markdown
+    attributes:
+      value: |
+        スマホから短い日本語でVPSへ安全な確認jobを送るフォームです。
+
+        今は決まった言い方だけを、許可済みjobへ変換します。
+
+  - type: textarea
+    id: request
+    attributes:
+      label: やってほしいこと
+      description: 普通の確認ならこのまま投稿できます。
+      value: ai-councilの状態見て
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        使える言い方:
+
+        - `ai-councilの状態見て`
+        - `ai-councilをチェックして`
+        - `作業場まとめて`
+        - `ワークスペース一覧見て`
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: パスワード、token、SSH秘密鍵、APIキー、その他secretsを書いていません。
+          required: true
+        - label: 任意のshell command実行は依頼していません。
+          required: true

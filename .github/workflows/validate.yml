@@ -43,3 +43,4 @@ jobs:
           test -f systemd/ai-council-github-bridge.timer
           test -f .github/ISSUE_TEMPLATE/vps-job.md
           test -f .github/ISSUE_TEMPLATE/vps-job-mobile.yml
+          test -f .github/ISSUE_TEMPLATE/vps-job-casual.yml
