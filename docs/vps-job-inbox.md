@@ -59,6 +59,7 @@ Supported `JOB_TYPE` values:
 
 - `repo_check`
 - `workspace_summary`
+- `ai_plan`
 
 ## Create A Job
 
@@ -72,6 +73,12 @@ Workspace summary:
 
 ```bash
 bash scripts/create_job.sh workspace_summary
+```
+
+AI worker plan:
+
+```bash
+bash scripts/create_job.sh ai_plan ai-council
 ```
 
 If the queue directory is root-owned, run the same command with `sudo`.

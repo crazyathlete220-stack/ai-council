@@ -85,7 +85,7 @@ if [[ ! "${JOB_ID}" =~ ^[A-Za-z0-9._:-]+$ ]]; then
 fi
 
 case "${JOB_TYPE}" in
-  repo_check | workspace_summary)
+  repo_check | workspace_summary | ai_plan)
     ;;
   *)
     echo "ERROR: Unsupported job type: ${JOB_TYPE}" >&2
@@ -161,6 +161,20 @@ run_job() {
       echo "sudo bash ${APP_DIR}/scripts/report_workspaces.sh"
       echo
       sudo bash "${APP_DIR}/scripts/report_workspaces.sh"
+      ;;
+    ai_plan)
+      if [[ ! -f "${APP_DIR}/scripts/run_ai_plan.sh" ]]; then
+        echo "ERROR: Missing script: ${APP_DIR}/scripts/run_ai_plan.sh" >&2
+        return 1
+      fi
+      echo "## Execute"
+      echo "sudo bash ${APP_DIR}/scripts/run_ai_plan.sh ${REPO_NAME:-ai-council}"
+      echo
+      sudo env \
+        AI_COUNCIL_JOB_ID="${JOB_ID}" \
+        AI_COUNCIL_REQUEST_SOURCE="${REQUEST_SOURCE:-}" \
+        AI_COUNCIL_REQUESTED_BY="${REQUESTED_BY:-}" \
+        bash "${APP_DIR}/scripts/run_ai_plan.sh" "${REPO_NAME:-ai-council}"
       ;;
     *)
       echo "ERROR: Unsupported job type: ${JOB_TYPE}" >&2

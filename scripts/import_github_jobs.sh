@@ -17,6 +17,12 @@ derive_casual_job() {
 
   request_text_lc="$(printf "%s" "${request_text}" | tr "[:upper:]" "[:lower:]")"
 
+  if printf "%s" "${request_text_lc}" | grep -Eq "ai_plan|計画|作戦|方針|plan|プラン"; then
+    job_type="ai_plan"
+    repo_name="ai-council"
+    return 0
+  fi
+
   if printf "%s" "${request_text_lc}" | grep -Eq "workspace_summary|作業場|ワークスペース|workspace|一覧|まとめ|サマリー"; then
     job_type="workspace_summary"
     repo_name="all"
@@ -95,6 +101,9 @@ ${issue_body}"; then
       ;;
     workspace_summary)
       repo_name="${repo_name:-all}"
+      ;;
+    ai_plan)
+      repo_name="${repo_name:-ai-council}"
       ;;
     *)
       echo "Skipping issue #${issue_number}: unsupported or missing JOB_TYPE"

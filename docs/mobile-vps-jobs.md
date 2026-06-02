@@ -65,6 +65,20 @@ Repo Path: /opt/ai-workspaces/ai-council
 
 ## Other Supported Request
 
+Casual planning examples:
+
+```text
+ai-councilの作業計画を立てて
+次の方針を出して
+```
+
+Direct plan command:
+
+```text
+JOB_TYPE=ai_plan
+REPO_NAME=ai-council
+```
+
 Casual workspace summary examples:
 
 ```text
