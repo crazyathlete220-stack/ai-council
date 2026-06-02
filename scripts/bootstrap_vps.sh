@@ -5,6 +5,8 @@ APP_DIR="/opt/ai-council"
 LOG_DIR="/var/log/ai-council"
 SERVICE_NAME="ai-council-healthcheck.service"
 TIMER_NAME="ai-council-healthcheck.timer"
+JOB_SERVICE_NAME="ai-council-job-runner.service"
+JOB_TIMER_NAME="ai-council-job-runner.timer"
 
 if [[ "${EUID}" -ne 0 ]]; then
   echo "ERROR: Run this script as root, for example: sudo bash scripts/bootstrap_vps.sh" >&2
@@ -27,12 +29,49 @@ install -d -m 0755 "${LOG_DIR}"
 
 echo "Copying scripts and systemd units..."
 install -m 0644 "${REPO_DIR}/README.md" "${APP_DIR}/README.md"
-install -m 0644 "${REPO_DIR}/docs/vps-operations.md" "${APP_DIR}/docs/vps-operations.md"
-install -m 0644 "${REPO_DIR}/docs/runbook.md" "${APP_DIR}/docs/runbook.md"
-install -m 0755 "${REPO_DIR}/scripts/healthcheck.sh" "${APP_DIR}/scripts/healthcheck.sh"
-install -m 0755 "${REPO_DIR}/scripts/report_status.sh" "${APP_DIR}/scripts/report_status.sh"
-install -m 0644 "${REPO_DIR}/systemd/${SERVICE_NAME}" "/etc/systemd/system/${SERVICE_NAME}"
-install -m 0644 "${REPO_DIR}/systemd/${TIMER_NAME}" "/etc/systemd/system/${TIMER_NAME}"
+
+DOC_FILES=(
+  "vps-operations.md"
+  "runbook.md"
+  "vps-workspace-operations.md"
+  "vps-phase2-workspace-setup.md"
+  "vps-ai-operator.md"
+  "vps-job-inbox.md"
+)
+
+SCRIPT_FILES=(
+  "healthcheck.sh"
+  "report_status.sh"
+  "setup_workspaces.sh"
+  "register_workspace.sh"
+  "workspace_status.sh"
+  "run_repo_check.sh"
+  "report_workspaces.sh"
+  "setup_operator_user.sh"
+  "create_job.sh"
+  "run_job_once.sh"
+  "job_status.sh"
+  "report_job_result.sh"
+)
+
+SYSTEMD_FILES=(
+  "${SERVICE_NAME}"
+  "${TIMER_NAME}"
+  "${JOB_SERVICE_NAME}"
+  "${JOB_TIMER_NAME}"
+)
+
+for doc_file in "${DOC_FILES[@]}"; do
+  install -m 0644 "${REPO_DIR}/docs/${doc_file}" "${APP_DIR}/docs/${doc_file}"
+done
+
+for script_file in "${SCRIPT_FILES[@]}"; do
+  install -m 0755 "${REPO_DIR}/scripts/${script_file}" "${APP_DIR}/scripts/${script_file}"
+done
+
+for systemd_file in "${SYSTEMD_FILES[@]}"; do
+  install -m 0644 "${REPO_DIR}/systemd/${systemd_file}" "/etc/systemd/system/${systemd_file}"
+done
 
 echo "Reloading systemd and enabling timer..."
 systemctl daemon-reload
@@ -47,4 +86,12 @@ Next confirmation commands:
   sudo systemctl start ${SERVICE_NAME}
   sudo cat ${LOG_DIR}/latest-report.md
   sudo journalctl -u ${SERVICE_NAME} -n 100 --no-pager
+
+Phase 3 operator commands, after review:
+  sudo bash ${APP_DIR}/scripts/setup_operator_user.sh
+  bash ${APP_DIR}/scripts/job_status.sh
+  bash ${APP_DIR}/scripts/create_job.sh repo_check <REPO_NAME>
+  sudo bash ${APP_DIR}/scripts/run_job_once.sh
+  sudo bash ${APP_DIR}/scripts/report_job_result.sh
+  sudo systemctl enable --now ${JOB_TIMER_NAME}
 EOF

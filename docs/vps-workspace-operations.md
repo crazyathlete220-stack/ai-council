@@ -9,7 +9,7 @@ Use the VPS as an AI work area so build, test, repository checks, and log genera
 - GitHub Issues that describe work to check
 - GitHub PRs that need build, test, lint, or status evidence
 - Tanabe-san's manual VPS commands
-- A future job inbox for queued workspace tasks
+- The Phase 3 job inbox for queued workspace tasks
 
 ## Read
 
@@ -110,4 +110,4 @@ Tanabe-san can keep editing video on the PC while checking:
 - This phase does not host ChatGPT, Claude, Codex, or other AI model services on the VPS.
 - The VPS is a work area, execution area, and evidence area.
 - Treat workspace operation as unconfirmed until a VPS-side run writes a repo report under `/var/log/ai-council/workspaces/`.
-- GitHub posting and credentials automation remain out of scope.
+- GitHub posting and credentials automation remain out of scope unless they are configured outside this repository.
