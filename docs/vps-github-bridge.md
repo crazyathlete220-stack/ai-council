@@ -17,12 +17,14 @@ This repository does not create GitHub tokens, SSH private keys, API keys, or se
 
 ## Issue Request Format
 
-Create an Issue from `.github/ISSUE_TEMPLATE/vps-job.md` and include:
+For smartphone use, create an Issue from the `VPS Job Mobile` form. It applies the `vps-job` label automatically and includes the normal command:
 
 ```text
 JOB_TYPE=repo_check
 REPO_NAME=ai-council
 ```
+
+The shorter mobile guide is [mobile-vps-jobs.md](mobile-vps-jobs.md).
 
 Supported job types:
 
@@ -87,3 +89,4 @@ The bridge is not confirmed until a GitHub Issue request produces:
 
 If `gh` is missing or not authenticated, the bridge reports `AUTH_REQUIRED` and does not touch secrets.
 
+For smartphone confirmation, open the same Issue and check for a `VPS job result` comment containing `JOB_RUNNER_STATUS: OK` and the expected job-specific status such as `REPO_CHECK_STATUS: OK`.

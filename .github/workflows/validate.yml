@@ -24,6 +24,7 @@ jobs:
           test -f docs/vps-ai-operator.md
           test -f docs/vps-job-inbox.md
           test -f docs/vps-github-bridge.md
+          test -f docs/mobile-vps-jobs.md
           test -f scripts/setup_workspaces.sh
           test -f scripts/register_workspace.sh
           test -f scripts/workspace_status.sh
@@ -41,3 +42,4 @@ jobs:
           test -f systemd/ai-council-github-bridge.service
           test -f systemd/ai-council-github-bridge.timer
           test -f .github/ISSUE_TEMPLATE/vps-job.md
+          test -f .github/ISSUE_TEMPLATE/vps-job-mobile.yml

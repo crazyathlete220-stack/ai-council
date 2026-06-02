@@ -1,0 +1,44 @@
+name: VPS Job Mobile
+description: Send a simple VPS job from a smartphone
+title: "[VPS Job] repo_check ai-council"
+labels:
+  - vps-job
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form from a smartphone when the PC is closed.
+
+        Leave the command as-is for the normal `ai-council` repository check.
+        The VPS will post the result back to this Issue.
+
+  - type: textarea
+    id: command
+    attributes:
+      label: VPS job command
+      description: Keep these two lines for a normal repository check. Create another Issue for another job.
+      value: |
+        JOB_TYPE=repo_check
+        REPO_NAME=ai-council
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose
+      description: Short note for yourself, such as what you want to confirm.
+      placeholder: Check whether the ai-council workspace is healthy.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I did not include passwords, tokens, SSH private keys, API keys, or other secrets.
+          required: true
+        - label: I am not asking the VPS to run arbitrary shell commands.
+          required: true
