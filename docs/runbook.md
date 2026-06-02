@@ -170,10 +170,15 @@ sudo systemctl enable --now ai-council-job-runner.timer
 
 If a smartphone request is missing, check:
 
+- the requester used the `VPS Job Mobile` Issue form
 - GitHub Issues with the `vps-job` label from a browser or authenticated local machine
+- the Issue body includes `JOB_TYPE=repo_check` and `REPO_NAME=ai-council`
+- the Issue has no passwords, tokens, SSH private keys, API keys, or other secrets
 - `bash scripts/job_status.sh` on the VPS
 
 If the GitHub bridge is not configured yet, convert approved GitHub requests into local jobs with `scripts/create_job.sh`.
+
+The mobile confirmation path is the Issue comment titled `VPS job result`. A healthy repository check includes `REPO_CHECK_STATUS: OK` and `JOB_RUNNER_STATUS: OK`.
 
 ## GitHub Bridge Recovery
 

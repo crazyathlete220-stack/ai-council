@@ -64,7 +64,9 @@ Operator confirmation is based on `/var/log/ai-council/jobs/latest-job-report.md
 
 The GitHub bridge lets a smartphone-created Issue with the `vps-job` label become a VPS job. It requires `gh` to be installed and authenticated on the VPS, but this repository does not create or store GitHub tokens or secrets.
 
-Start from [docs/vps-github-bridge.md](docs/vps-github-bridge.md).
+For smartphone requests, start from [docs/mobile-vps-jobs.md](docs/mobile-vps-jobs.md) and use the `VPS Job Mobile` Issue form.
+
+For VPS operations, start from [docs/vps-github-bridge.md](docs/vps-github-bridge.md).
 
 Manual bridge commands on the VPS:
 
@@ -118,4 +120,5 @@ sudo journalctl -u ai-council-github-bridge.service -n 100 --no-pager
 - Job inbox: `/var/lib/ai-council/jobs/`
 - Job reports: `/var/log/ai-council/jobs/`
 - GitHub bridge: `docs/vps-github-bridge.md`
+- Mobile VPS jobs: `docs/mobile-vps-jobs.md`
 - GitHub bridge state: `/var/lib/ai-council/github-bridge/`
