@@ -28,7 +28,7 @@ The Phase 2 workspace flow is:
 1. Confirm the repo exists under `/opt/ai-workspaces`.
 2. Register the repo with `scripts/register_workspace.sh`.
 3. Detect dependency and command candidates from repo files.
-4. Run available build, test, and lint commands manually through `scripts/run_repo_check.sh`.
+4. Run available build, test, and lint commands manually through `sudo bash scripts/run_repo_check.sh`.
 5. Write the result to repo-specific logs.
 
 This phase never runs `npm install` or `npm ci` automatically. Missing scripts are recorded as `SKIP`, not treated as a command failure.
@@ -89,8 +89,8 @@ Retry with:
 
 ```bash
 bash scripts/workspace_status.sh
-bash scripts/run_repo_check.sh <REPO_NAME>
-bash scripts/report_workspaces.sh
+sudo bash scripts/run_repo_check.sh <REPO_NAME>
+sudo bash scripts/report_workspaces.sh
 ```
 
 If repo placement is wrong, re-place or re-register that repo only. Do not delete workspace roots as part of the normal recovery path.

@@ -33,7 +33,7 @@ Phase 2 prepares the VPS as an AI work area for repository checks. The workload 
 
 Start from [docs/vps-phase2-workspace-setup.md](docs/vps-phase2-workspace-setup.md), then use [docs/vps-workspace-operations.md](docs/vps-workspace-operations.md) as the operations guide.
 
-Workspace confirmation is based on `scripts/run_repo_check.sh <REPO_NAME>` generating `/var/log/ai-council/workspaces/<REPO_NAME>/latest-report.md` on the VPS.
+Workspace confirmation is based on `sudo bash scripts/run_repo_check.sh <REPO_NAME>` generating `/var/log/ai-council/workspaces/<REPO_NAME>/latest-report.md` on the VPS.
 
 ## Verification Commands
 

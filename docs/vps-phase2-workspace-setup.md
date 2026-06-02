@@ -49,18 +49,18 @@ Run these manually from this repository directory on the VPS:
 sudo bash scripts/setup_workspaces.sh
 sudo bash scripts/register_workspace.sh <REPO_NAME> /opt/ai-workspaces/<REPO_NAME>
 bash scripts/workspace_status.sh
-bash scripts/run_repo_check.sh <REPO_NAME>
-bash scripts/report_workspaces.sh
+sudo bash scripts/run_repo_check.sh <REPO_NAME>
+sudo bash scripts/report_workspaces.sh
 ```
 
-If writing under `/var/log/ai-council/workspaces` is blocked, rerun the repo check or summary command with `sudo`.
+`run_repo_check.sh` and `report_workspaces.sh` write under `/var/log/ai-council/workspaces`, so run them with `sudo` by default. `workspace_status.sh` is read-oriented and can stay as a normal user command.
 
 ## Success Conditions
 
 - `/opt/ai-workspaces` exists.
 - `/var/log/ai-council/workspaces` exists.
 - The repo-specific log directory exists.
-- `scripts/run_repo_check.sh <REPO_NAME>` can run.
+- `sudo bash scripts/run_repo_check.sh <REPO_NAME>` can run.
 - `/var/log/ai-council/workspaces/<REPO_NAME>/latest-report.md` is generated.
 - The report ends with `REPO_CHECK_STATUS: OK` or `REPO_CHECK_STATUS: ERROR`.
 - `scripts/workspace_status.sh` ends with `WORKSPACE_REGISTRY_STATUS: OK` or `WORKSPACE_REGISTRY_STATUS: ERROR`.

@@ -57,5 +57,5 @@ Registered workspace:
 
 Next confirmation commands:
   bash scripts/workspace_status.sh
-  bash scripts/run_repo_check.sh ${repo_name}
+  sudo bash scripts/run_repo_check.sh ${repo_name}
 EOF

@@ -26,6 +26,6 @@ Created or confirmed:
 Next confirmation commands:
   sudo bash scripts/register_workspace.sh <REPO_NAME> ${WORKSPACE_ROOT}/<REPO_NAME>
   bash scripts/workspace_status.sh
-  bash scripts/run_repo_check.sh <REPO_NAME>
-  bash scripts/report_workspaces.sh
+  sudo bash scripts/run_repo_check.sh <REPO_NAME>
+  sudo bash scripts/report_workspaces.sh
 EOF

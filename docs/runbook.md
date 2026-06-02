@@ -90,14 +90,10 @@ Run logs contain the command output that produced the latest report.
 ### Rerun Repo Check Manually
 
 ```bash
-bash scripts/run_repo_check.sh <REPO_NAME>
-```
-
-If writing to `/var/log/ai-council/workspaces` is blocked, rerun with:
-
-```bash
 sudo bash scripts/run_repo_check.sh <REPO_NAME>
 ```
+
+Use `sudo` because the repo check writes under `/var/log/ai-council/workspaces`.
 
 ### npm Missing
 
@@ -110,11 +106,11 @@ If `lint`, `test`, or `build` scripts are absent from `package.json`, the repo c
 ### Aggregate Workspace Reports
 
 ```bash
-bash scripts/report_workspaces.sh
+sudo bash scripts/report_workspaces.sh
 sudo cat /var/log/ai-council/workspaces/latest-summary.md
 ```
 
-If writing the summary is blocked, rerun the report command with `sudo`.
+Use `sudo` because the summary writes to `/var/log/ai-council/workspaces/latest-summary.md`.
 
 ## GitHub Report Template
 

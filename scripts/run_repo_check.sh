@@ -5,7 +5,7 @@ REGISTRY_DIR="/etc/ai-council/workspaces.d"
 errors=0
 
 usage() {
-  echo "Usage: bash scripts/run_repo_check.sh <REPO_NAME>" >&2
+  echo "Usage: sudo bash scripts/run_repo_check.sh <REPO_NAME>" >&2
 }
 
 mark_error() {
@@ -64,6 +64,7 @@ config_file="${REGISTRY_DIR}/${requested_repo}.env"
 if [[ ! -r "${config_file}" ]]; then
   echo "ERROR: workspace config is not readable: ${config_file}" >&2
   echo "Try: sudo bash scripts/register_workspace.sh ${requested_repo} /opt/ai-workspaces/${requested_repo}" >&2
+  echo "Then: sudo bash scripts/run_repo_check.sh ${requested_repo}" >&2
   exit 1
 fi
 
