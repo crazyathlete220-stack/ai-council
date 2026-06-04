@@ -1,0 +1,32 @@
+name: VPS Free Request
+description: Send a free-form safe request to the VPS
+title: "[VPS Free Request] "
+labels:
+  - vps-job
+body:
+  - type: markdown
+    attributes:
+      value: |
+        スマホや外部端末から、自然な文章でVPSへ相談・指示を送るフォームです。
+
+        分類できない自由文は `ai_plan` として扱われ、計画レポートだけを作ります。
+        Issue本文はshellとして実行されません。
+
+  - type: textarea
+    id: request
+    attributes:
+      label: やってほしいこと
+      description: 自然な文章で書けます。secretsやパスワードは書かないでください。
+      placeholder: PCを閉じているので、次に安全に進める作業を整理して。
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: パスワード、token、SSH秘密鍵、APIキー、その他secretsを書いていません。
+          required: true
+        - label: 任意のshell command実行、install、git push、PR作成は依頼していません。
+          required: true

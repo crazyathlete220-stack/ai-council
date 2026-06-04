@@ -94,6 +94,11 @@ for row in $(printf "%s" "${issues_json}" | jq -r '.[] | @base64'); do
     if derive_casual_job "${issue_title}
 ${issue_body}"; then
       request_mode="casual"
+    else
+      job_type="ai_plan"
+      repo_name="${repo_name:-ai-council}"
+      request_mode="freeform_plan"
+      echo "Routing issue #${issue_number}: free-form request -> ai_plan"
     fi
   fi
 
