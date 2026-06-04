@@ -29,10 +29,15 @@ The default safety limits are:
 AI_COUNCIL_AI_EXEC_MAX_ISSUE_BODY_BYTES=12000
 AI_COUNCIL_AI_EXEC_TIMEOUT_SECONDS=900
 AI_COUNCIL_AI_EXEC_MIN_INTERVAL_SECONDS=300
+AI_COUNCIL_AI_EXEC_ALLOWED_HOURS_JST=10-21
+AI_COUNCIL_AI_EXEC_MAX_PER_HOUR=1
+AI_COUNCIL_AI_EXEC_MAX_PER_DAY=5
 AI_COUNCIL_AI_EXEC_GUARD_ROOT=/var/lib/ai-council/ai-exec
 ```
 
 Override these only as VPS-side environment variables. Do not commit secrets or account credentials into repository files.
+
+`AI_COUNCIL_AI_EXEC_ALLOWED_HOURS_JST=10-21` means `ai_exec` can start from 10:00 through 21:59 JST. At 22:00 JST and later, it reports `AI_EXEC_STATUS: OUT_OF_HOURS` and does not start Codex CLI.
 
 Guardrail evidence appears in `/var/log/ai-council/ai-cli/latest-exec.md` as:
 
@@ -41,6 +46,12 @@ Max Issue Body Bytes:
 Issue Body Bytes:
 Timeout Seconds:
 Minimum Interval Seconds:
+Allowed Hours JST:
+Current Hour JST:
+Max Per Hour:
+Hourly Count Before Run:
+Max Per Day:
+Daily Count Before Run:
 Guard Status:
 ```
 
@@ -51,6 +62,9 @@ AI_EXEC_STATUS: INPUT_TOO_LARGE
 AI_EXEC_STATUS: RATE_LIMITED
 AI_EXEC_STATUS: TIMEOUT
 AI_EXEC_STATUS: GUARD_UNAVAILABLE
+AI_EXEC_STATUS: OUT_OF_HOURS
+AI_EXEC_STATUS: HOURLY_LIMIT
+AI_EXEC_STATUS: DAILY_LIMIT
 ```
 
 ## VPS Setup

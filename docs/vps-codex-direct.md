@@ -52,6 +52,23 @@ The bridge imports it only when:
 - the GitHub author is listed in `/etc/ai-council/github-bridge-allowlist`
 - the request passes the `ai_exec` guardrails
 
+## Budget Guardrails
+
+Default Codex Direct execution limits:
+
+```text
+AI_COUNCIL_AI_EXEC_ALLOWED_HOURS_JST=10-21
+AI_COUNCIL_AI_EXEC_MAX_PER_HOUR=1
+AI_COUNCIL_AI_EXEC_MAX_PER_DAY=5
+AI_COUNCIL_AI_EXEC_TIMEOUT_SECONDS=900
+AI_COUNCIL_AI_EXEC_MIN_INTERVAL_SECONDS=300
+AI_COUNCIL_AI_EXEC_MAX_ISSUE_BODY_BYTES=12000
+```
+
+`10-21` means Codex Direct can start from 10:00 through 21:59 JST. At 22:00 JST and later, the job is refused before Codex CLI starts.
+
+These limits are indirect cost controls. They limit when and how often Codex CLI can run, but they do not measure exact token usage.
+
 ## Good Request Examples
 
 ```text
@@ -78,6 +95,14 @@ The Issue should receive a comment containing:
 VPS job result
 AI_EXEC_STATUS: OK
 JOB_RUNNER_STATUS: OK
+```
+
+Expected guardrail refusal signals:
+
+```text
+AI_EXEC_STATUS: OUT_OF_HOURS
+AI_EXEC_STATUS: HOURLY_LIMIT
+AI_EXEC_STATUS: DAILY_LIMIT
 ```
 
 If no comment appears after ten minutes, check:

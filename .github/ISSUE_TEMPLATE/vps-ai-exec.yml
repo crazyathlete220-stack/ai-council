@@ -13,6 +13,7 @@ body:
         `git push`、PR作成、secrets作成は行いません。
         VPS側のGitHub username allowlistに含まれる投稿者だけがjob化されます。
         依頼文が長すぎる場合、連投の場合、実行が長すぎる場合はguardrailで止まります。
+        標準では10:00〜21:59 JST、1時間1回、1日5回まで実行できます。
 
   - type: textarea
     id: command

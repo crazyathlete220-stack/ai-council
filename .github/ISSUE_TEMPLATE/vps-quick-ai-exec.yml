@@ -12,6 +12,7 @@ body:
         VPS上の認証済みCodex CLIが登録workspace内で作業する可能性があります。
         `git push`、PR作成、secrets作成、install系commandは行いません。
         投稿者はVPS側allowlistで制限され、長すぎる依頼や連投はguardrailで止まります。
+        標準では10:00〜21:59 JST、1時間1回、1日5回まで実行できます。
 
   - type: textarea
     id: command

@@ -139,6 +139,16 @@ REPO_NAME=ai-council
 
 Default `ai_exec` guardrails limit GitHub Issue input to 12000 bytes, stop the CLI after 900 seconds, block concurrent runs, and rate-limit back-to-back runs for 300 seconds. These limits can be changed with VPS-side environment variables only; do not store secrets in repository files.
 
+Default Codex Direct budget guardrails allow `ai_exec` only from 10:00 through 21:59 JST, with 1 run per hour and 5 runs per day:
+
+```text
+AI_COUNCIL_AI_EXEC_ALLOWED_HOURS_JST=10-21
+AI_COUNCIL_AI_EXEC_MAX_PER_HOUR=1
+AI_COUNCIL_AI_EXEC_MAX_PER_DAY=5
+```
+
+These are indirect cost controls. They limit starts, frequency, time, and input size; they do not measure exact token usage.
+
 ## Claude Code Readiness
 
 Claude Code is not installed automatically by this repository. Start from [docs/vps-claude-code.md](docs/vps-claude-code.md), then run:

@@ -187,4 +187,4 @@ bash /opt/ai-council/scripts/job_status.sh
 - Do not close existing Issues as part of a job request.
 - Free-form requests are planning-first unless they match a known safe job type.
 - Use `VPS Codex Direct`, `VPS Quick AI Exec`, or `VPS AI Exec` only when the VPS should actually run the authenticated Codex CLI in the workspace.
-- For `VPS AI Exec`, keep the request short enough for one bounded job. The defaults reject Issue bodies over 12000 bytes, stop the AI CLI after 900 seconds, block concurrent `ai_exec` runs, and rate-limit back-to-back `ai_exec` runs for 300 seconds.
+- For `VPS Codex Direct` and other `ai_exec` forms, keep the request short enough for one bounded job. The defaults allow starts only from 10:00 through 21:59 JST, allow 1 run per hour and 5 runs per day, reject Issue bodies over 12000 bytes, stop the AI CLI after 900 seconds, block concurrent runs, and rate-limit back-to-back runs for 300 seconds.

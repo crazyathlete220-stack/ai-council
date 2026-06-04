@@ -361,13 +361,26 @@ AI_EXEC_STATUS: INPUT_TOO_LARGE
 AI_EXEC_STATUS: RATE_LIMITED
 AI_EXEC_STATUS: TIMEOUT
 AI_EXEC_STATUS: GUARD_UNAVAILABLE
+AI_EXEC_STATUS: OUT_OF_HOURS
+AI_EXEC_STATUS: HOURLY_LIMIT
+AI_EXEC_STATUS: DAILY_LIMIT
 ```
 
 Check the current limits and guard evidence:
 
 ```bash
-sudo grep -E "AI_EXEC_STATUS|Status Reason|Guard Status|Max Issue Body Bytes|Issue Body Bytes|Timeout Seconds|Minimum Interval Seconds" /var/log/ai-council/ai-cli/latest-exec.md
+sudo grep -E "AI_EXEC_STATUS|Status Reason|Guard Status|Max Issue Body Bytes|Issue Body Bytes|Timeout Seconds|Minimum Interval Seconds|Allowed Hours JST|Current Hour JST|Max Per Hour|Hourly Count|Max Per Day|Daily Count" /var/log/ai-council/ai-cli/latest-exec.md
 ```
+
+Default Codex Direct budget guardrails:
+
+```text
+AI_COUNCIL_AI_EXEC_ALLOWED_HOURS_JST=10-21
+AI_COUNCIL_AI_EXEC_MAX_PER_HOUR=1
+AI_COUNCIL_AI_EXEC_MAX_PER_DAY=5
+```
+
+`10-21` allows starts from 10:00 through 21:59 JST. At 22:00 JST and later, the job reports `OUT_OF_HOURS` and does not start Codex CLI.
 
 ### Review Workspace Diff
 

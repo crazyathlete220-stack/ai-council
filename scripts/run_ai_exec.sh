@@ -21,9 +21,13 @@ github_repo="${AI_COUNCIL_GITHUB_REPO:-crazyathlete220-stack/ai-council}"
 max_issue_body_bytes="${AI_COUNCIL_AI_EXEC_MAX_ISSUE_BODY_BYTES:-12000}"
 timeout_seconds="${AI_COUNCIL_AI_EXEC_TIMEOUT_SECONDS:-900}"
 min_interval_seconds="${AI_COUNCIL_AI_EXEC_MIN_INTERVAL_SECONDS:-300}"
+allowed_hours_jst="${AI_COUNCIL_AI_EXEC_ALLOWED_HOURS_JST:-10-21}"
+max_per_hour="${AI_COUNCIL_AI_EXEC_MAX_PER_HOUR:-1}"
+max_per_day="${AI_COUNCIL_AI_EXEC_MAX_PER_DAY:-5}"
 guard_root="${AI_COUNCIL_AI_EXEC_GUARD_ROOT:-/var/lib/ai-council/ai-exec}"
 last_run_file="${guard_root}/last-run-at"
 lock_file="${guard_root}/run.lock"
+history_file="${guard_root}/run-history.tsv"
 
 if [[ "${repo_name}" == "--help" || "${repo_name}" == "-h" ]]; then
   usage
@@ -47,6 +51,29 @@ fi
 
 if [[ ! "${min_interval_seconds}" =~ ^[0-9]+$ ]]; then
   echo "ERROR: AI_COUNCIL_AI_EXEC_MIN_INTERVAL_SECONDS must be zero or a positive integer" >&2
+  exit 1
+fi
+
+if [[ ! "${max_per_hour}" =~ ^[0-9]+$ ]]; then
+  echo "ERROR: AI_COUNCIL_AI_EXEC_MAX_PER_HOUR must be zero or a positive integer" >&2
+  exit 1
+fi
+
+if [[ ! "${max_per_day}" =~ ^[0-9]+$ ]]; then
+  echo "ERROR: AI_COUNCIL_AI_EXEC_MAX_PER_DAY must be zero or a positive integer" >&2
+  exit 1
+fi
+
+if [[ ! "${allowed_hours_jst}" =~ ^([0-9]{1,2})-([0-9]{1,2})$ ]]; then
+  echo "ERROR: AI_COUNCIL_AI_EXEC_ALLOWED_HOURS_JST must use START-END hour format, for example 10-21" >&2
+  exit 1
+fi
+
+allowed_start_hour="${BASH_REMATCH[1]}"
+allowed_end_hour="${BASH_REMATCH[2]}"
+
+if [[ "${allowed_start_hour}" -gt 23 || "${allowed_end_hour}" -gt 23 ]]; then
+  echo "ERROR: AI_COUNCIL_AI_EXEC_ALLOWED_HOURS_JST hours must be between 0 and 23" >&2
   exit 1
 fi
 
@@ -125,6 +152,11 @@ issue_url=""
 issue_title="not available"
 issue_excerpt="not available"
 issue_body_bytes=0
+current_hour_jst="$(TZ=Asia/Tokyo date +%H)"
+current_day_jst="$(TZ=Asia/Tokyo date +%Y-%m-%d)"
+current_hour_bucket_jst="$(TZ=Asia/Tokyo date +%Y-%m-%dT%H)"
+hourly_count=0
+daily_count=0
 ai_exec_status="OK"
 status_reason="completed"
 cli_exit=0
@@ -205,6 +237,10 @@ fi
   echo "- Current Issue body bytes: ${issue_body_bytes}"
   echo "- Timeout seconds: ${timeout_seconds}"
   echo "- Minimum interval seconds: ${min_interval_seconds}"
+  echo "- Allowed hours JST: ${allowed_hours_jst}"
+  echo "- Current hour JST: ${current_hour_jst}"
+  echo "- Max per hour: ${max_per_hour}"
+  echo "- Max per day: ${max_per_day}"
   echo
   echo "User request:"
   echo
@@ -221,6 +257,30 @@ fi
 
 chown "${operator_user}:${operator_user}" "${prompt_file}"
 chmod 0640 "${prompt_file}"
+
+if [[ "${should_run_cli}" -eq 1 ]]; then
+  current_hour_number=$((10#${current_hour_jst}))
+  allowed_start_number=$((10#${allowed_start_hour}))
+  allowed_end_number=$((10#${allowed_end_hour}))
+
+  if [[ "${allowed_start_number}" -le "${allowed_end_number}" ]]; then
+    if [[ "${current_hour_number}" -lt "${allowed_start_number}" || "${current_hour_number}" -gt "${allowed_end_number}" ]]; then
+      ai_exec_status="OUT_OF_HOURS"
+      status_reason="current JST hour ${current_hour_jst} is outside allowed hours ${allowed_hours_jst}"
+      cli_exit=1
+      should_run_cli=0
+      guard_status="out_of_hours"
+    fi
+  else
+    if [[ "${current_hour_number}" -lt "${allowed_start_number}" && "${current_hour_number}" -gt "${allowed_end_number}" ]]; then
+      ai_exec_status="OUT_OF_HOURS"
+      status_reason="current JST hour ${current_hour_jst} is outside allowed hours ${allowed_hours_jst}"
+      cli_exit=1
+      should_run_cli=0
+      guard_status="out_of_hours"
+    fi
+  fi
+fi
 
 if [[ "${should_run_cli}" -eq 1 ]]; then
   if ! command -v flock >/dev/null 2>&1; then
@@ -262,6 +322,27 @@ if [[ "${should_run_cli}" -eq 1 && "${min_interval_seconds}" -gt 0 && -f "${last
 fi
 
 if [[ "${should_run_cli}" -eq 1 ]]; then
+  if [[ -f "${history_file}" ]]; then
+    hourly_count="$(awk -F '\t' -v bucket="${current_hour_bucket_jst}" '$2 == bucket {count++} END {print count + 0}' "${history_file}")"
+    daily_count="$(awk -F '\t' -v day="${current_day_jst}" '$3 == day {count++} END {print count + 0}' "${history_file}")"
+  fi
+
+  if [[ "${max_per_hour}" -gt 0 && "${hourly_count}" -ge "${max_per_hour}" ]]; then
+    ai_exec_status="HOURLY_LIMIT"
+    status_reason="ai_exec hourly limit reached: ${hourly_count}/${max_per_hour} for ${current_hour_bucket_jst} JST"
+    cli_exit=1
+    should_run_cli=0
+    guard_status="hourly_limit"
+  elif [[ "${max_per_day}" -gt 0 && "${daily_count}" -ge "${max_per_day}" ]]; then
+    ai_exec_status="DAILY_LIMIT"
+    status_reason="ai_exec daily limit reached: ${daily_count}/${max_per_day} for ${current_day_jst} JST"
+    cli_exit=1
+    should_run_cli=0
+    guard_status="daily_limit"
+  fi
+fi
+
+if [[ "${should_run_cli}" -eq 1 ]]; then
   codex_bin="$(command -v codex 2>/dev/null || true)"
   timeout_bin="$(command -v timeout 2>/dev/null || true)"
 
@@ -280,6 +361,15 @@ if [[ "${should_run_cli}" -eq 1 ]]; then
     cli_exit=1
   else
     date -u +%s > "${last_run_file}"
+    {
+      printf "%s\t%s\t%s\t%s\t%s\t%s\n" \
+        "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+        "${current_hour_bucket_jst}" \
+        "${current_day_jst}" \
+        "${job_id}" \
+        "${request_source}" \
+        "${repo_name}"
+    } >> "${history_file}"
     guard_status="running"
 
     codex_args=(
@@ -351,7 +441,14 @@ fi
   echo "- Issue Body Bytes: ${issue_body_bytes}"
   echo "- Timeout Seconds: ${timeout_seconds}"
   echo "- Minimum Interval Seconds: ${min_interval_seconds}"
+  echo "- Allowed Hours JST: ${allowed_hours_jst}"
+  echo "- Current Hour JST: ${current_hour_jst}"
+  echo "- Max Per Hour: ${max_per_hour}"
+  echo "- Hourly Count Before Run: ${hourly_count}"
+  echo "- Max Per Day: ${max_per_day}"
+  echo "- Daily Count Before Run: ${daily_count}"
   echo "- Guard Root: ${guard_root}"
+  echo "- History File: ${history_file}"
   echo
   echo "## Safety Boundary"
   echo
@@ -363,6 +460,8 @@ fi
   echo "- GitHub Issue input is limited before the AI CLI starts."
   echo "- The AI CLI process is run with a timeout."
   echo "- Concurrent ai_exec jobs are blocked and back-to-back ai_exec jobs are rate-limited."
+  echo "- ai_exec runs are allowed only during configured JST hours."
+  echo "- ai_exec runs are limited per hour and per day."
   echo
   echo "## Git Status Before"
   echo
