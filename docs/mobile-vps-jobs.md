@@ -20,11 +20,11 @@ Open GitHub on the smartphone, then:
 1. open `crazyathlete220-stack/ai-council`
 2. open `Issues`
 3. tap `New issue`
-4. choose `VPS Job Casual`
-5. leave `ai-councilの状態見て` unchanged for the normal check
+4. choose `VPS Free Request` for natural-language instructions, or `VPS Job Casual` for a known short request
+5. write the request naturally, such as `PCを閉じているので、次に安全に進める作業を整理して`
 6. submit the Issue
 
-The casual form turns this request:
+When the bridge can classify the request, it turns known phrases into safe VPS jobs. For example:
 
 ```text
 ai-councilの状態見て
@@ -36,6 +36,15 @@ into the safe VPS job:
 JOB_TYPE=repo_check
 REPO_NAME=ai-council
 ```
+
+If the bridge cannot classify the free text, it routes the request to:
+
+```text
+JOB_TYPE=ai_plan
+REPO_NAME=ai-council
+```
+
+This fallback creates planning evidence only. It does not execute the free-form text as shell.
 
 The Issue template applies the `vps-job` label automatically. The bridge only imports Issues with that label.
 
@@ -79,6 +88,14 @@ JOB_TYPE=ai_plan
 REPO_NAME=ai-council
 ```
 
+Free-form examples that safely fall back to planning:
+
+```text
+PCを閉じているので、次に安全に進める作業を整理して
+このあとどう進めればいいかVPS側で考えて
+スマホから雑に投げるので、まず方針だけ出して
+```
+
 Casual bounded check examples:
 
 ```text
@@ -115,7 +132,7 @@ Create one Issue per job. To run the same job again, create a new Issue.
 Wait up to ten minutes, then check the Issue:
 
 - label includes `vps-job`
-- request says `ai-councilの状態見て`, `ai-councilをチェックして`, `ai-councilを検証して`, `作業場まとめて`, or uses direct `JOB_TYPE` lines
+- request says `ai-councilの状態見て`, `ai-councilをチェックして`, `ai-councilを検証して`, `作業場まとめて`, uses direct `JOB_TYPE` lines, or uses a free-form planning request
 - no passwords, tokens, SSH private keys, API keys, or other secrets were included
 
 If the Issue still has no result comment, check the VPS:
@@ -132,3 +149,4 @@ bash /opt/ai-council/scripts/job_status.sh
 - Do not request arbitrary shell commands.
 - Do not request `git pull`, `git push`, `npm install`, or `npm ci`.
 - Do not close existing Issues as part of a job request.
+- Free-form requests are planning-first unless they match a known safe job type.

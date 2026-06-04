@@ -10,6 +10,7 @@ body:
         スマホから短い日本語でVPSへ安全な確認jobを送るフォームです。
 
         今は決まった言い方だけを、許可済みjobへ変換します。
+        自由に書きたい場合は `VPS Free Request` を使ってください。
 
   - type: textarea
     id: request

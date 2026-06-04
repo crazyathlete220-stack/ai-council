@@ -45,6 +45,8 @@ The `VPS AI Plan` Issue form provides that default command.
 
 Short casual phrases that include `計画`, `方針`, `plan`, or `プラン` are also mapped to `ai_plan` for `ai-council`.
 
+Free-form requests that do not match a known safe job type are also routed to `ai_plan`. This lets smartphone requests stay conversational while keeping execution planning-only.
+
 ## Send An ai_check Request
 
 Create a GitHub Issue with the `vps-job` label and include:

@@ -47,5 +47,6 @@ jobs:
           test -f .github/ISSUE_TEMPLATE/vps-job.md
           test -f .github/ISSUE_TEMPLATE/vps-job-mobile.yml
           test -f .github/ISSUE_TEMPLATE/vps-job-casual.yml
+          test -f .github/ISSUE_TEMPLATE/vps-free-request.yml
           test -f .github/ISSUE_TEMPLATE/vps-ai-plan.yml
           test -f .github/ISSUE_TEMPLATE/vps-ai-check.yml

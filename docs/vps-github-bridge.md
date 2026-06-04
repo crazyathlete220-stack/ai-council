@@ -17,13 +17,17 @@ This repository does not create GitHub tokens, SSH private keys, API keys, or se
 
 ## Issue Request Format
 
-For smartphone use, create an Issue from the `VPS Job Casual` form. It applies the `vps-job` label automatically and accepts short Japanese requests:
+For smartphone use, create an Issue from the `VPS Free Request` form. It applies the `vps-job` label automatically and accepts natural-language requests.
+
+Known short Japanese requests are classified into specific safe jobs:
 
 ```text
 ai-councilの状態見て
 作業場まとめて
 ai-councilを検証して
 ```
+
+If a labeled Issue has no explicit `JOB_TYPE` and does not match a known phrase, the bridge routes it to `ai_plan` as a safe planning fallback.
 
 Use `VPS Job Mobile` when you want to edit the direct command:
 
@@ -41,7 +45,7 @@ Supported job types:
 - `ai_plan`
 - `ai_check`
 
-Supported casual phrases are intentionally mapped only to those job types. Phrases with `計画`, `方針`, `plan`, or `プラン` map to `ai_plan`. Phrases with `検証`, `安全確認`, `チェックだけ`, `確認だけ`, or `check only` map to `ai_check`. Unsupported free text is skipped instead of being executed.
+Supported casual phrases are intentionally mapped only to those job types. Phrases with `計画`, `方針`, `plan`, or `プラン` map to `ai_plan`. Phrases with `検証`, `安全確認`, `チェックだけ`, `確認だけ`, or `check only` map to `ai_check`. Unclassified free text maps to `ai_plan` and is not executed as shell.
 
 One Issue creates one VPS job. To run another job, create another Issue.
 

@@ -64,7 +64,7 @@ Operator confirmation is based on `/var/log/ai-council/jobs/latest-job-report.md
 
 The GitHub bridge lets a smartphone-created Issue with the `vps-job` label become a VPS job. It requires `gh` to be installed and authenticated on the VPS, but this repository does not create or store GitHub tokens or secrets.
 
-For smartphone requests, start from [docs/mobile-vps-jobs.md](docs/mobile-vps-jobs.md) and use the `VPS Job Casual` Issue form for short Japanese requests. Use `VPS Job Mobile` when you want direct `JOB_TYPE` fields.
+For smartphone requests, start from [docs/mobile-vps-jobs.md](docs/mobile-vps-jobs.md) and use the `VPS Free Request` Issue form for natural-language requests. Use `VPS Job Casual` for known short Japanese requests, or `VPS Job Mobile` when you want direct `JOB_TYPE` fields.
 
 For VPS operations, start from [docs/vps-github-bridge.md](docs/vps-github-bridge.md).
 
@@ -101,6 +101,8 @@ To ask the VPS for a safe check while the PC is closed, use the `VPS AI Check` I
 JOB_TYPE=ai_check
 REPO_NAME=ai-council
 ```
+
+For a free-form request, use the `VPS Free Request` Issue form. If the bridge cannot classify the text as a known check or summary request, it routes the request to `ai_plan` and creates planning evidence only.
 
 ## Verification Commands
 
