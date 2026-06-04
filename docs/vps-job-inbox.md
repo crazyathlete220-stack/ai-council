@@ -115,8 +115,8 @@ sudo bash scripts/report_job_result.sh
 ## Smartphone Entry Flow
 
 1. Open GitHub from the smartphone.
-2. Create an Issue using `.github/ISSUE_TEMPLATE/vps-job.md`.
-3. Fill in `JOB_TYPE` and `REPO_NAME`.
+2. Create an Issue using `VPS Codex Direct`, `VPS Free Request`, or `.github/ISSUE_TEMPLATE/vps-job.md`.
+3. Fill in `JOB_TYPE` and `REPO_NAME` when the selected form exposes direct command fields.
 4. `scripts/import_github_jobs.sh` converts the Issue into a VPS queue job when `gh` is authenticated on the VPS and the Issue author is in the VPS-side allowlist.
 5. The VPS runner creates `/var/log/ai-council/jobs/latest-job-report.md`.
 6. `scripts/post_job_result_to_github.sh` can paste the result back to the Issue when `gh` is authenticated on the VPS.

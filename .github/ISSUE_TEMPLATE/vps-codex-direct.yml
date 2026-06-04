@@ -1,0 +1,44 @@
+name: VPS Codex Direct
+description: Send a short direct instruction to Codex CLI on the VPS
+title: "[VPS Codex] "
+labels:
+  - vps-job
+body:
+  - type: markdown
+    attributes:
+      value: |
+        AI会議室とは分けて、VPS上のCodex CLIだけに短く指示するフォームです。
+
+        実行先はVPS上の登録workspaceです。AIモデル本体はVPSへ移行していません。
+        `git push`、PR作成、secrets作成、install系commandは行いません。
+        投稿者はVPS側allowlistで制限され、長すぎる依頼や連投はguardrailで止まります。
+
+  - type: textarea
+    id: command
+    attributes:
+      label: VPS job command
+      description: Codex Directでは通常このまま使います。
+      value: |
+        JOB_TYPE=ai_exec
+        REPO_NAME=ai-council
+    validations:
+      required: true
+
+  - type: textarea
+    id: request
+    attributes:
+      label: Codexへの指示
+      description: 1つの短い作業だけを書いてください。会議形式ではなく、Codexへの直接依頼として扱います。
+      placeholder: READMEを確認して、スマホからの依頼入口が分かりやすいかだけ報告して。編集はしないで。
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: パスワード、token、SSH秘密鍵、APIキー、git push、PR作成、install系commandは依頼していません。
+          required: true
+        - label: この依頼はAI会議室ではなく、VPS上のCodex CLIへの直接依頼です。
+          required: true

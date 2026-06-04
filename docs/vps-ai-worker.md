@@ -68,7 +68,7 @@ Short casual phrases that include `検証`, `安全確認して`, `安全確認�
 
 ## Send An ai_exec Request
 
-Use the `VPS AI Exec` Issue form when the request should actually run the VPS AI CLI. It includes:
+Use the `VPS Codex Direct` Issue form for the normal Codex-only smartphone lane, `VPS Quick AI Exec` for the older short-form alias, or the longer `VPS AI Exec` Issue form when you want the full checklist. All include:
 
 ```text
 JOB_TYPE=ai_exec
@@ -78,6 +78,8 @@ REPO_NAME=ai-council
 Free-form requests do not automatically route to `ai_exec`. This keeps casual smartphone messages planning-only unless execution is explicit.
 
 GitHub Issue imports must pass the VPS-side author allowlist before any `ai_exec` job is created. `ai_exec` also has default safety guardrails: 12000-byte maximum Issue body, 900-second CLI timeout, one active `ai_exec` at a time, and a 300-second minimum interval between starts.
+
+Claude Code is not an active Issue bridge lane. See [vps-claude-code.md](vps-claude-code.md) before installing or authenticating it on the VPS.
 
 ## Run Manually On The VPS
 

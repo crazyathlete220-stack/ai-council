@@ -74,7 +74,9 @@ sudo chmod 0644 /etc/ai-council/github-bridge-allowlist
 
 If the allowlist file is missing or empty, the bridge refuses imports and writes rejection evidence under `/var/log/ai-council/github-bridge/rejected-issues.log`.
 
-For smartphone requests, start from [docs/mobile-vps-jobs.md](docs/mobile-vps-jobs.md) and use the `VPS Free Request` Issue form for natural-language requests. Use `VPS Job Casual` for known short Japanese requests, or `VPS Job Mobile` when you want direct `JOB_TYPE` fields.
+For smartphone requests, start from [docs/mobile-vps-jobs.md](docs/mobile-vps-jobs.md). Use `VPS Codex Direct` when you want to send one short instruction to Codex only, separate from the AI meeting-room concept. Use `VPS Free Request` for planning-only natural-language requests.
+
+For the shortest actual VPS AI CLI request, `VPS Codex Direct` and `VPS Quick AI Exec` both use the same allowlist and `ai_exec` guardrails. Prefer `VPS Codex Direct` for normal smartphone use.
 
 For VPS operations, start from [docs/vps-github-bridge.md](docs/vps-github-bridge.md).
 
@@ -90,8 +92,9 @@ sudo bash scripts/post_job_result_to_github.sh
 Timer-based bridge processing remains manual until reviewed:
 
 ```bash
-sudo systemctl enable --now ai-council-github-bridge.timer
-sudo systemctl status ai-council-github-bridge.timer
+bash scripts/github_bridge_timer.sh status
+sudo bash scripts/github_bridge_timer.sh enable
+sudo bash scripts/github_bridge_timer.sh disable
 ```
 
 ## Phase 5 AI Worker
@@ -136,6 +139,22 @@ REPO_NAME=ai-council
 
 Default `ai_exec` guardrails limit GitHub Issue input to 12000 bytes, stop the CLI after 900 seconds, block concurrent runs, and rate-limit back-to-back runs for 300 seconds. These limits can be changed with VPS-side environment variables only; do not store secrets in repository files.
 
+## Claude Code Readiness
+
+Claude Code is not installed automatically by this repository. Start from [docs/vps-claude-code.md](docs/vps-claude-code.md), then run:
+
+```bash
+bash scripts/claude_code_readiness.sh
+```
+
+The current 2GB VPS is below Claude Code's official 4GB+ RAM guidance, so Claude Code remains an optional manual decision. Codex CLI is the confirmed active VPS AI CLI lane.
+
+## Codex Direct Lane
+
+Codex Direct is the separate, simple lane for sending instructions to Codex only. Start from [docs/vps-codex-direct.md](docs/vps-codex-direct.md) and use the `VPS Codex Direct` Issue form.
+
+This lane still does not run `git push`, create PRs, create secrets, install dependencies, run Claude Code, or host an AI model on the VPS.
+
 ## Verification Commands
 
 ```bash
@@ -146,6 +165,8 @@ systemctl status ai-council-healthcheck.timer
 systemctl list-timers ai-council-healthcheck.timer
 bash scripts/job_status.sh
 sudo bash scripts/run_job_once.sh
+bash scripts/github_bridge_timer.sh status
+bash scripts/claude_code_readiness.sh
 ```
 
 ## Log Commands
@@ -156,6 +177,7 @@ sudo cat /var/log/ai-council/jobs/latest-job-report.md
 sudo cat /var/log/ai-council/ai-worker/latest-plan.md
 sudo cat /var/log/ai-council/ai-worker/latest-check.md
 sudo cat /var/log/ai-council/ai-cli/latest-exec.md
+sudo tail -n 50 /var/log/ai-council/github-bridge/rejected-issues.log
 sudo journalctl -u ai-council-healthcheck.service -n 100 --no-pager
 sudo journalctl -u ai-council-healthcheck.timer -n 100 --no-pager
 sudo journalctl -u ai-council-job-runner.service -n 100 --no-pager
@@ -178,4 +200,6 @@ sudo journalctl -u ai-council-github-bridge.service -n 100 --no-pager
 - Mobile VPS jobs: `docs/mobile-vps-jobs.md`
 - VPS AI worker: `docs/vps-ai-worker.md`
 - VPS AI CLI runner: `docs/vps-ai-cli-runner.md`
+- VPS Codex Direct: `docs/vps-codex-direct.md`
+- VPS Claude Code decision: `docs/vps-claude-code.md`
 - GitHub bridge state: `/var/lib/ai-council/github-bridge/`

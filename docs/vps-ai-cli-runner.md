@@ -88,6 +88,21 @@ REPO_NAME=ai-council
 
 The request body can be natural language. Keep secrets out of the Issue.
 
+Use `VPS Codex Direct` for the normal smartphone flow when the request should go to Codex only, separate from the AI会議室 concept. It creates the same `ai_exec` job with a shorter checklist.
+
+Use `VPS Quick AI Exec` only as the older short-form alias.
+
+## Claude Code
+
+Claude Code is not enabled as an execution lane here. Use [vps-claude-code.md](vps-claude-code.md) to check readiness and decide whether a manual Claude Code setup is worth doing.
+
+Current default:
+
+```text
+Codex CLI: active lane
+Claude Code: optional, not installed automatically
+```
+
 ## Evidence
 
 `ai_exec` writes:

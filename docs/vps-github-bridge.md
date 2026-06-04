@@ -55,7 +55,7 @@ GITHUB_JOB_IMPORT_STATUS: ALLOWLIST_REQUIRED
 
 ## Issue Request Format
 
-For smartphone use, create an Issue from the `VPS Free Request` form. It applies the `vps-job` label automatically and accepts natural-language requests.
+For smartphone use, create an Issue from the `VPS Codex Direct` form for one short Codex-only instruction, or the `VPS Free Request` form for planning-only natural-language requests. Both apply the `vps-job` label automatically.
 
 Known short Japanese requests are classified into specific safe jobs:
 
@@ -86,7 +86,7 @@ Supported job types:
 
 Supported casual phrases are intentionally mapped only to those job types. Phrases with `計画`, `方針`, `plan`, or `プラン` map to `ai_plan`. Phrases with `検証`, `安全確認して`, `安全確認を`, `チェックだけ`, `確認だけ`, or `check only` map to `ai_check`. Unclassified free text maps to `ai_plan` and is not executed as shell.
 
-`ai_exec` is not selected by casual phrase matching. Use the `VPS AI Exec` Issue form or explicit `JOB_TYPE=ai_exec` when the VPS should run the authenticated AI CLI.
+`ai_exec` is not selected by casual phrase matching. Use the `VPS Codex Direct`, `VPS Quick AI Exec`, or `VPS AI Exec` Issue form, or explicit `JOB_TYPE=ai_exec`, when the VPS should run the authenticated Codex CLI.
 
 One Issue creates one VPS job. To run another job, create another Issue.
 
@@ -110,12 +110,19 @@ Expected signals:
 
 ## Timer-Based Bridge
 
-After review, enable the timer manually:
+Use the helper script so ON/OFF state is visible:
 
 ```bash
-sudo systemctl enable --now ai-council-github-bridge.timer
-sudo systemctl status ai-council-github-bridge.timer
+bash /opt/ai-council/scripts/github_bridge_timer.sh status
+sudo bash /opt/ai-council/scripts/github_bridge_timer.sh enable
+sudo bash /opt/ai-council/scripts/github_bridge_timer.sh disable
 ```
+
+Recommended mode while the system is still being tuned:
+
+- keep the timer disabled when you do not want the VPS to pick up new Issues
+- enable it when smartphone requests should run while the PC is closed
+- check that `GITHUB_BRIDGE_TIMER_STATUS: ON` appears before relying on unattended pickup
 
 The timer runs:
 
