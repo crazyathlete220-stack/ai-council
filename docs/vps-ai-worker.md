@@ -58,7 +58,7 @@ REPO_NAME=ai-council
 
 The `VPS AI Check` Issue form provides that default command.
 
-Short casual phrases that include `検証`, `安全確認`, `チェックだけ`, `確認だけ`, or `check only` are mapped to `ai_check` for `ai-council`.
+Short casual phrases that include `検証`, `安全確認して`, `安全確認を`, `チェックだけ`, `確認だけ`, or `check only` are mapped to `ai_check` for `ai-council`.
 
 ## Run Manually On The VPS
 

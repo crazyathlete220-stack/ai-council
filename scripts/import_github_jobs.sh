@@ -23,7 +23,7 @@ derive_casual_job() {
     return 0
   fi
 
-  if printf "%s" "${request_text_lc}" | grep -Eq "ai_check|検証|安全確認|チェックだけ|確認だけ|check only"; then
+  if printf "%s" "${request_text_lc}" | grep -Eq "ai_check|検証|安全確認して|安全確認を|安全に確認|チェックだけ|確認だけ|check only"; then
     job_type="ai_check"
     repo_name="ai-council"
     return 0
@@ -35,7 +35,7 @@ derive_casual_job() {
     return 0
   fi
 
-  if printf "%s" "${request_text_lc}" | grep -Eq "repo_check|ai-council|状態|確認|チェック|ヘルス|health|repo|リポジトリ"; then
+  if printf "%s" "${request_text_lc}" | grep -Eq "repo_check|ai-council.*(状態|確認|チェック)|ヘルス|health|repo|リポジトリ"; then
     job_type="repo_check"
     repo_name="ai-council"
     return 0
