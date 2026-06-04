@@ -22,6 +22,7 @@ For smartphone use, create an Issue from the `VPS Job Casual` form. It applies t
 ```text
 ai-councilの状態見て
 作業場まとめて
+ai-councilを検証して
 ```
 
 Use `VPS Job Mobile` when you want to edit the direct command:
@@ -38,8 +39,9 @@ Supported job types:
 - `repo_check`
 - `workspace_summary`
 - `ai_plan`
+- `ai_check`
 
-Supported casual phrases are intentionally mapped only to those job types. Phrases with `計画`, `方針`, `plan`, or `プラン` map to `ai_plan`. Unsupported free text is skipped instead of being executed.
+Supported casual phrases are intentionally mapped only to those job types. Phrases with `計画`, `方針`, `plan`, or `プラン` map to `ai_plan`. Phrases with `検証`, `安全確認`, `チェックだけ`, `確認だけ`, or `check only` map to `ai_check`. Unsupported free text is skipped instead of being executed.
 
 One Issue creates one VPS job. To run another job, create another Issue.
 

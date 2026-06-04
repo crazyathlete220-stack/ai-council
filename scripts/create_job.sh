@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: bash scripts/create_job.sh <repo_check|workspace_summary|ai_plan> [REPO_NAME]" >&2
+  echo "Usage: bash scripts/create_job.sh <repo_check|workspace_summary|ai_plan|ai_check> [REPO_NAME]" >&2
 }
 
 JOB_ROOT="${AI_COUNCIL_JOB_ROOT:-/var/lib/ai-council/jobs}"
@@ -29,6 +29,9 @@ case "${job_type}" in
     repo_name="${repo_name:-all}"
     ;;
   ai_plan)
+    repo_name="${repo_name:-ai-council}"
+    ;;
+  ai_check)
     repo_name="${repo_name:-ai-council}"
     ;;
   *)

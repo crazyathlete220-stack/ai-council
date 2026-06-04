@@ -37,6 +37,7 @@ jobs:
           test -f scripts/job_status.sh
           test -f scripts/report_job_result.sh
           test -f scripts/run_ai_plan.sh
+          test -f scripts/run_ai_check.sh
           test -f scripts/import_github_jobs.sh
           test -f scripts/post_job_result_to_github.sh
           test -f systemd/ai-council-job-runner.service
@@ -47,3 +48,4 @@ jobs:
           test -f .github/ISSUE_TEMPLATE/vps-job-mobile.yml
           test -f .github/ISSUE_TEMPLATE/vps-job-casual.yml
           test -f .github/ISSUE_TEMPLATE/vps-ai-plan.yml
+          test -f .github/ISSUE_TEMPLATE/vps-ai-check.yml

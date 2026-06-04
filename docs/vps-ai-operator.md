@@ -35,6 +35,7 @@ The first supported job types are:
 - `repo_check`: run `sudo bash /opt/ai-council/scripts/run_repo_check.sh <REPO_NAME>`
 - `workspace_summary`: run `sudo bash /opt/ai-council/scripts/report_workspaces.sh`
 - `ai_plan`: run `sudo bash /opt/ai-council/scripts/run_ai_plan.sh <REPO_NAME>`
+- `ai_check`: run `sudo bash /opt/ai-council/scripts/run_ai_check.sh <REPO_NAME>`
 
 The runner processes one queued job at a time:
 

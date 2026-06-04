@@ -58,6 +58,7 @@ SCRIPT_FILES=(
   "job_status.sh"
   "report_job_result.sh"
   "run_ai_plan.sh"
+  "run_ai_check.sh"
   "import_github_jobs.sh"
   "post_job_result_to_github.sh"
 )
@@ -102,6 +103,7 @@ Phase 3 operator commands, after review:
   bash ${APP_DIR}/scripts/job_status.sh
   bash ${APP_DIR}/scripts/create_job.sh repo_check <REPO_NAME>
   bash ${APP_DIR}/scripts/create_job.sh ai_plan ai-council
+  bash ${APP_DIR}/scripts/create_job.sh ai_check ai-council
   sudo bash ${APP_DIR}/scripts/run_job_once.sh
   sudo bash ${APP_DIR}/scripts/report_job_result.sh
   sudo systemctl enable --now ${JOB_TIMER_NAME}

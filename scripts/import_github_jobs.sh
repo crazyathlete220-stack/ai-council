@@ -23,6 +23,12 @@ derive_casual_job() {
     return 0
   fi
 
+  if printf "%s" "${request_text_lc}" | grep -Eq "ai_check|検証|安全確認|チェックだけ|確認だけ|check only"; then
+    job_type="ai_check"
+    repo_name="ai-council"
+    return 0
+  fi
+
   if printf "%s" "${request_text_lc}" | grep -Eq "workspace_summary|作業場|ワークスペース|workspace|一覧|まとめ|サマリー"; then
     job_type="workspace_summary"
     repo_name="all"
@@ -103,6 +109,9 @@ ${issue_body}"; then
       repo_name="${repo_name:-all}"
       ;;
     ai_plan)
+      repo_name="${repo_name:-ai-council}"
+      ;;
+    ai_check)
       repo_name="${repo_name:-ai-council}"
       ;;
     *)
