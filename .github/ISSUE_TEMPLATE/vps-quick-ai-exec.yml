@@ -1,0 +1,42 @@
+name: VPS Quick AI Exec
+description: Short smartphone request for the VPS AI CLI
+title: "[VPS Quick Exec] "
+labels:
+  - vps-job
+body:
+  - type: markdown
+    attributes:
+      value: |
+        スマホから短く依頼するためのフォームです。
+
+        VPS上の認証済みCodex CLIが登録workspace内で作業する可能性があります。
+        `git push`、PR作成、secrets作成、install系commandは行いません。
+        投稿者はVPS側allowlistで制限され、長すぎる依頼や連投はguardrailで止まります。
+
+  - type: textarea
+    id: command
+    attributes:
+      label: VPS job command
+      description: 通常はこのまま使います。
+      value: |
+        JOB_TYPE=ai_exec
+        REPO_NAME=ai-council
+    validations:
+      required: true
+
+  - type: textarea
+    id: request
+    attributes:
+      label: 依頼
+      description: 1つの短い作業だけを書いてください。secretsやパスワードは書かないでください。
+      placeholder: READMEとdocs/vps-ai-cli-runner.mdを確認して、編集せずに現状を報告して。
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: パスワード、token、SSH秘密鍵、APIキー、git push、PR作成、install系commandは依頼していません。
+          required: true

@@ -43,6 +43,7 @@ DOC_FILES=(
   "mobile-vps-jobs.md"
   "vps-ai-worker.md"
   "vps-ai-cli-runner.md"
+  "vps-claude-code.md"
 )
 
 SCRIPT_FILES=(
@@ -63,6 +64,8 @@ SCRIPT_FILES=(
   "setup_ai_cli_runner.sh"
   "ai_cli_status.sh"
   "run_ai_exec.sh"
+  "github_bridge_timer.sh"
+  "claude_code_readiness.sh"
   "import_github_jobs.sh"
   "post_job_result_to_github.sh"
 )
@@ -119,7 +122,11 @@ GitHub bridge commands, after gh authentication is configured on the VPS:
   sudo install -d -m 0755 /etc/ai-council
   printf '%s\n' '<GITHUB_USERNAME>' | sudo tee /etc/ai-council/github-bridge-allowlist >/dev/null
   sudo chmod 0644 /etc/ai-council/github-bridge-allowlist
+  bash ${APP_DIR}/scripts/github_bridge_timer.sh status
   sudo bash ${APP_DIR}/scripts/import_github_jobs.sh
   sudo bash ${APP_DIR}/scripts/post_job_result_to_github.sh
-  sudo systemctl enable --now ${GITHUB_BRIDGE_TIMER_NAME}
+  sudo bash ${APP_DIR}/scripts/github_bridge_timer.sh enable
+
+Claude Code readiness, before any manual install decision:
+  bash ${APP_DIR}/scripts/claude_code_readiness.sh
 EOF

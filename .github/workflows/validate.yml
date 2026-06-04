@@ -27,6 +27,7 @@ jobs:
           test -f docs/mobile-vps-jobs.md
           test -f docs/vps-ai-worker.md
           test -f docs/vps-ai-cli-runner.md
+          test -f docs/vps-claude-code.md
           test -f scripts/setup_workspaces.sh
           test -f scripts/register_workspace.sh
           test -f scripts/workspace_status.sh
@@ -42,6 +43,8 @@ jobs:
           test -f scripts/setup_ai_cli_runner.sh
           test -f scripts/ai_cli_status.sh
           test -f scripts/run_ai_exec.sh
+          test -f scripts/github_bridge_timer.sh
+          test -f scripts/claude_code_readiness.sh
           test -f scripts/import_github_jobs.sh
           test -f scripts/post_job_result_to_github.sh
           test -f systemd/ai-council-job-runner.service
@@ -55,3 +58,4 @@ jobs:
           test -f .github/ISSUE_TEMPLATE/vps-ai-plan.yml
           test -f .github/ISSUE_TEMPLATE/vps-ai-check.yml
           test -f .github/ISSUE_TEMPLATE/vps-ai-exec.yml
+          test -f .github/ISSUE_TEMPLATE/vps-quick-ai-exec.yml

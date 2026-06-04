@@ -88,6 +88,19 @@ REPO_NAME=ai-council
 
 The request body can be natural language. Keep secrets out of the Issue.
 
+Use `VPS Quick AI Exec` for the shortest smartphone flow. It creates the same `ai_exec` job with a shorter checklist.
+
+## Claude Code
+
+Claude Code is not enabled as an execution lane here. Use [vps-claude-code.md](vps-claude-code.md) to check readiness and decide whether a manual Claude Code setup is worth doing.
+
+Current default:
+
+```text
+Codex CLI: active lane
+Claude Code: optional, not installed automatically
+```
+
 ## Evidence
 
 `ai_exec` writes:

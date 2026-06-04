@@ -248,13 +248,17 @@ sudo journalctl -u ai-council-github-bridge.service -n 100 --no-pager
 ```bash
 sudo systemctl status ai-council-github-bridge.timer
 sudo systemctl list-timers ai-council-github-bridge.timer
+bash /opt/ai-council/scripts/github_bridge_timer.sh status
 ```
 
-The bridge timer is enabled manually after `gh auth status` succeeds:
+The bridge timer is controlled manually after `gh auth status` succeeds and the allowlist exists:
 
 ```bash
-sudo systemctl enable --now ai-council-github-bridge.timer
+sudo bash /opt/ai-council/scripts/github_bridge_timer.sh enable
+sudo bash /opt/ai-council/scripts/github_bridge_timer.sh disable
 ```
+
+Use `enable` only when the VPS should pick up smartphone Issues while the PC is closed. Use `disable` when you want Issue intake paused.
 
 ## AI Worker Plan Recovery
 
@@ -374,6 +378,31 @@ git diff
 ```
 
 Do not push from the VPS until a separate PR creation phase is reviewed.
+
+## Claude Code Readiness Recovery
+
+Claude Code is optional and is not installed automatically by this repository.
+
+Check readiness:
+
+```bash
+bash /opt/ai-council/scripts/claude_code_readiness.sh
+```
+
+Expected status before manual Claude setup on the current 2GB VPS:
+
+```text
+CLAUDE_CODE_READINESS_STATUS: NOT_READY
+```
+
+That is acceptable. The active confirmed lane is Codex CLI. If Claude Code is installed manually later, rerun:
+
+```bash
+bash /opt/ai-council/scripts/ai_cli_status.sh ai-council
+bash /opt/ai-council/scripts/claude_code_readiness.sh
+```
+
+Do not add Claude Code execution to the Issue bridge until a separate reviewed job type is added.
 
 ## GitHub Report Template
 
