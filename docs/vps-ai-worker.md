@@ -77,6 +77,8 @@ REPO_NAME=ai-council
 
 Free-form requests do not automatically route to `ai_exec`. This keeps casual smartphone messages planning-only unless execution is explicit.
 
+GitHub Issue imports must pass the VPS-side author allowlist before any `ai_exec` job is created. `ai_exec` also has default safety guardrails: 12000-byte maximum Issue body, 900-second CLI timeout, one active `ai_exec` at a time, and a 300-second minimum interval between starts.
+
 ## Run Manually On The VPS
 
 ```bash
@@ -150,6 +152,7 @@ When the request came from a GitHub Issue, the bridge can post those signals bac
 - `ai_check` does not execute free-form Issue text as shell.
 - `ai_exec` may edit files in the registered VPS workspace.
 - `ai_exec` does not run `git push`, create PRs, or create secrets.
+- `ai_exec` is limited by Issue input size, timeout, concurrency, and minimum interval guardrails.
 - `ai_plan` does not create GitHub tokens, SSH private keys, API keys, passwords, or secrets.
 - VPS AI CLI execution is confirmed only after `/var/log/ai-council/ai-cli/latest-exec.md` contains `AI_EXEC_STATUS: OK`.
 

@@ -116,6 +116,9 @@ Phase 3 operator commands, after review:
   sudo systemctl enable --now ${JOB_TIMER_NAME}
 
 GitHub bridge commands, after gh authentication is configured on the VPS:
+  sudo install -d -m 0755 /etc/ai-council
+  printf '%s\n' '<GITHUB_USERNAME>' | sudo tee /etc/ai-council/github-bridge-allowlist >/dev/null
+  sudo chmod 0644 /etc/ai-council/github-bridge-allowlist
   sudo bash ${APP_DIR}/scripts/import_github_jobs.sh
   sudo bash ${APP_DIR}/scripts/post_job_result_to_github.sh
   sudo systemctl enable --now ${GITHUB_BRIDGE_TIMER_NAME}

@@ -12,8 +12,46 @@ This is still not an AI model migration. The VPS reads approved GitHub Issue req
 - `gh auth status` succeeds on the VPS.
 - The authenticated GitHub account can read Issues and write Issue comments for this repository.
 - Issues use the `vps-job` label.
+- The Issue author is listed in the VPS-side allowlist file.
 
 This repository does not create GitHub tokens, SSH private keys, API keys, or secrets.
+
+## GitHub Author Allowlist
+
+The bridge is default-deny. It does not import any GitHub Issue until the VPS has an allowlist file:
+
+```text
+/etc/ai-council/github-bridge-allowlist
+```
+
+Create it on the VPS with one GitHub username per line:
+
+```bash
+sudo install -d -m 0755 /etc/ai-council
+printf '%s\n' '<GITHUB_USERNAME>' | sudo tee /etc/ai-council/github-bridge-allowlist >/dev/null
+sudo chmod 0644 /etc/ai-council/github-bridge-allowlist
+```
+
+Blank lines and `#` comments are ignored. The allowlist is not a secret, but it stays outside this repository so VPS operators can change authorized users without committing environment-specific state.
+
+To use a different file, set this VPS-side environment variable for the bridge process:
+
+```bash
+AI_COUNCIL_GITHUB_ALLOWED_USERS_FILE=/etc/ai-council/github-bridge-allowlist
+```
+
+When the allowlist file is missing, empty, or does not include the Issue author, the bridge refuses to create a job. Rejection evidence is written to:
+
+```text
+/var/log/ai-council/github-bridge/rejected-issues.log
+/var/lib/ai-council/github-bridge/rejected/
+```
+
+Expected blocked signal:
+
+```text
+GITHUB_JOB_IMPORT_STATUS: ALLOWLIST_REQUIRED
+```
 
 ## Issue Request Format
 

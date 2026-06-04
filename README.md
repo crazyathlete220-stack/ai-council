@@ -64,6 +64,16 @@ Operator confirmation is based on `/var/log/ai-council/jobs/latest-job-report.md
 
 The GitHub bridge lets a smartphone-created Issue with the `vps-job` label become a VPS job. It requires `gh` to be installed and authenticated on the VPS, but this repository does not create or store GitHub tokens or secrets.
 
+The bridge imports Issues only from GitHub usernames listed in the VPS-side allowlist file. Create that file outside the repository before enabling timer-based imports:
+
+```bash
+sudo install -d -m 0755 /etc/ai-council
+printf '%s\n' '<GITHUB_USERNAME>' | sudo tee /etc/ai-council/github-bridge-allowlist >/dev/null
+sudo chmod 0644 /etc/ai-council/github-bridge-allowlist
+```
+
+If the allowlist file is missing or empty, the bridge refuses imports and writes rejection evidence under `/var/log/ai-council/github-bridge/rejected-issues.log`.
+
 For smartphone requests, start from [docs/mobile-vps-jobs.md](docs/mobile-vps-jobs.md) and use the `VPS Free Request` Issue form for natural-language requests. Use `VPS Job Casual` for known short Japanese requests, or `VPS Job Mobile` when you want direct `JOB_TYPE` fields.
 
 For VPS operations, start from [docs/vps-github-bridge.md](docs/vps-github-bridge.md).
@@ -123,6 +133,8 @@ REPO_NAME=ai-council
 ```
 
 `ai_exec` may edit files in the VPS workspace, but it does not run `git push`, create PRs, or create secrets. It is not an AI model host; the VPS runs the CLI and workspace operations.
+
+Default `ai_exec` guardrails limit GitHub Issue input to 12000 bytes, stop the CLI after 900 seconds, block concurrent runs, and rate-limit back-to-back runs for 300 seconds. These limits can be changed with VPS-side environment variables only; do not store secrets in repository files.
 
 ## Verification Commands
 

@@ -117,7 +117,7 @@ sudo bash scripts/report_job_result.sh
 1. Open GitHub from the smartphone.
 2. Create an Issue using `.github/ISSUE_TEMPLATE/vps-job.md`.
 3. Fill in `JOB_TYPE` and `REPO_NAME`.
-4. `scripts/import_github_jobs.sh` converts the Issue into a VPS queue job when `gh` is authenticated on the VPS.
+4. `scripts/import_github_jobs.sh` converts the Issue into a VPS queue job when `gh` is authenticated on the VPS and the Issue author is in the VPS-side allowlist.
 5. The VPS runner creates `/var/log/ai-council/jobs/latest-job-report.md`.
 6. `scripts/post_job_result_to_github.sh` can paste the result back to the Issue when `gh` is authenticated on the VPS.
 
@@ -129,6 +129,8 @@ This phase creates the safe inbox and execution package. GitHub authentication s
 - Do not use the job inbox for arbitrary shell commands.
 - Do not run `git pull`, `git push`, `npm install`, or `npm ci` from the job runner.
 - `ai_exec` may edit files in the registered workspace, but it still must not run `git push` or create secrets.
+- GitHub Issue imports are allowed only for usernames listed in `/etc/ai-council/github-bridge-allowlist` on the VPS.
+- `ai_exec` has default input-size, timeout, concurrency, and minimum-interval guardrails.
 - Do not delete workspace roots as part of normal recovery.
 - Keep one job active at a time so evidence remains easy to inspect.
 
