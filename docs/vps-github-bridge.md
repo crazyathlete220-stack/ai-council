@@ -55,7 +55,7 @@ GITHUB_JOB_IMPORT_STATUS: ALLOWLIST_REQUIRED
 
 ## Issue Request Format
 
-For smartphone use, create an Issue from the `VPS Quick AI Exec` form for the shortest actual VPS AI CLI request, or the `VPS Free Request` form for planning-only natural-language requests. Both apply the `vps-job` label automatically.
+For smartphone use, create an Issue from the `VPS Codex Direct` form for one short Codex-only instruction, or the `VPS Free Request` form for planning-only natural-language requests. Both apply the `vps-job` label automatically.
 
 Known short Japanese requests are classified into specific safe jobs:
 
@@ -86,7 +86,7 @@ Supported job types:
 
 Supported casual phrases are intentionally mapped only to those job types. Phrases with `計画`, `方針`, `plan`, or `プラン` map to `ai_plan`. Phrases with `検証`, `安全確認して`, `安全確認を`, `チェックだけ`, `確認だけ`, or `check only` map to `ai_check`. Unclassified free text maps to `ai_plan` and is not executed as shell.
 
-`ai_exec` is not selected by casual phrase matching. Use the `VPS Quick AI Exec` or `VPS AI Exec` Issue form, or explicit `JOB_TYPE=ai_exec`, when the VPS should run the authenticated AI CLI.
+`ai_exec` is not selected by casual phrase matching. Use the `VPS Codex Direct`, `VPS Quick AI Exec`, or `VPS AI Exec` Issue form, or explicit `JOB_TYPE=ai_exec`, when the VPS should run the authenticated Codex CLI.
 
 One Issue creates one VPS job. To run another job, create another Issue.
 

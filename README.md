@@ -74,9 +74,9 @@ sudo chmod 0644 /etc/ai-council/github-bridge-allowlist
 
 If the allowlist file is missing or empty, the bridge refuses imports and writes rejection evidence under `/var/log/ai-council/github-bridge/rejected-issues.log`.
 
-For smartphone requests, start from [docs/mobile-vps-jobs.md](docs/mobile-vps-jobs.md) and use the `VPS Free Request` Issue form for natural-language requests. Use `VPS Job Casual` for known short Japanese requests, or `VPS Job Mobile` when you want direct `JOB_TYPE` fields.
+For smartphone requests, start from [docs/mobile-vps-jobs.md](docs/mobile-vps-jobs.md). Use `VPS Codex Direct` when you want to send one short instruction to Codex only, separate from the AI meeting-room concept. Use `VPS Free Request` for planning-only natural-language requests.
 
-For the shortest actual VPS AI CLI request, use the `VPS Quick AI Exec` Issue form. It still uses the same allowlist and `ai_exec` guardrails.
+For the shortest actual VPS AI CLI request, `VPS Codex Direct` and `VPS Quick AI Exec` both use the same allowlist and `ai_exec` guardrails. Prefer `VPS Codex Direct` for normal smartphone use.
 
 For VPS operations, start from [docs/vps-github-bridge.md](docs/vps-github-bridge.md).
 
@@ -149,6 +149,12 @@ bash scripts/claude_code_readiness.sh
 
 The current 2GB VPS is below Claude Code's official 4GB+ RAM guidance, so Claude Code remains an optional manual decision. Codex CLI is the confirmed active VPS AI CLI lane.
 
+## Codex Direct Lane
+
+Codex Direct is the separate, simple lane for sending instructions to Codex only. Start from [docs/vps-codex-direct.md](docs/vps-codex-direct.md) and use the `VPS Codex Direct` Issue form.
+
+This lane still does not run `git push`, create PRs, create secrets, install dependencies, run Claude Code, or host an AI model on the VPS.
+
 ## Verification Commands
 
 ```bash
@@ -194,5 +200,6 @@ sudo journalctl -u ai-council-github-bridge.service -n 100 --no-pager
 - Mobile VPS jobs: `docs/mobile-vps-jobs.md`
 - VPS AI worker: `docs/vps-ai-worker.md`
 - VPS AI CLI runner: `docs/vps-ai-cli-runner.md`
+- VPS Codex Direct: `docs/vps-codex-direct.md`
 - VPS Claude Code decision: `docs/vps-claude-code.md`
 - GitHub bridge state: `/var/lib/ai-council/github-bridge/`

@@ -88,7 +88,9 @@ REPO_NAME=ai-council
 
 The request body can be natural language. Keep secrets out of the Issue.
 
-Use `VPS Quick AI Exec` for the shortest smartphone flow. It creates the same `ai_exec` job with a shorter checklist.
+Use `VPS Codex Direct` for the normal smartphone flow when the request should go to Codex only, separate from the AI会議室 concept. It creates the same `ai_exec` job with a shorter checklist.
+
+Use `VPS Quick AI Exec` only as the older short-form alias.
 
 ## Claude Code
 

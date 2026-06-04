@@ -43,6 +43,7 @@ DOC_FILES=(
   "mobile-vps-jobs.md"
   "vps-ai-worker.md"
   "vps-ai-cli-runner.md"
+  "vps-codex-direct.md"
   "vps-claude-code.md"
 )
 

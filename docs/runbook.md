@@ -170,6 +170,7 @@ sudo systemctl enable --now ai-council-job-runner.timer
 
 If a smartphone request is missing, check:
 
+- the requester used `VPS Codex Direct` for Codex-only work, or `VPS Free Request` for planning-only work
 - the requester used the `VPS Job Casual` or `VPS Job Mobile` Issue form
 - GitHub Issues with the `vps-job` label from a browser or authenticated local machine
 - the Issue body includes a supported casual phrase such as `ai-councilの状態見て` or direct `JOB_TYPE=repo_check` and `REPO_NAME=ai-council`

@@ -20,7 +20,7 @@ Open GitHub on the smartphone, then:
 1. open `crazyathlete220-stack/ai-council`
 2. open `Issues`
 3. tap `New issue`
-4. choose `VPS Quick AI Exec` for the shortest actual VPS AI CLI request, `VPS Free Request` for natural-language planning, or `VPS Job Casual` for a known short request
+4. choose `VPS Codex Direct` for one short instruction to Codex only, `VPS Free Request` for natural-language planning, or `VPS Job Casual` for a known short request
 5. write the request naturally, such as `PCを閉じているので、次に安全に進める作業を整理して`
 6. submit the Issue
 
@@ -46,7 +46,7 @@ REPO_NAME=ai-council
 
 This fallback creates planning evidence only. It does not execute the free-form text as shell.
 
-Use `VPS Quick AI Exec` when the VPS should run the authenticated AI CLI and may edit files in the registered workspace. Use the longer `VPS AI Exec` form when you want the full checklist. These routes do not run `git push`, create PRs, or create secrets.
+Use `VPS Codex Direct` when the VPS should run the authenticated Codex CLI and may edit files in the registered workspace. This is the normal smartphone lane when you want Codex only, not an AI会議室 style discussion. Use `VPS Quick AI Exec` or the longer `VPS AI Exec` form only when you prefer those older names. These routes do not run `git push`, create PRs, or create secrets.
 
 The Issue template applies the `vps-job` label automatically. The bridge only imports Issues with that label.
 
@@ -56,7 +56,7 @@ Use `VPS Job Mobile` instead when you want to edit `JOB_TYPE` and `REPO_NAME` di
 
 ## Fastest Useful Requests
 
-Use `VPS Quick AI Exec` for one short task:
+Use `VPS Codex Direct` for one short task:
 
 ```text
 READMEとdocs/vps-ai-cli-runner.mdを確認して、編集せずに現状を報告して。
@@ -166,7 +166,7 @@ Wait up to ten minutes, then check the Issue:
 
 - label includes `vps-job`
 - your GitHub username is listed in `/etc/ai-council/github-bridge-allowlist` on the VPS
-- request says `ai-councilの状態見て`, `ai-councilをチェックして`, `ai-councilを検証して`, `作業場まとめて`, uses direct `JOB_TYPE` lines, uses `VPS Quick AI Exec`, uses `VPS AI Exec`, or uses a free-form planning request
+- request says `ai-councilの状態見て`, `ai-councilをチェックして`, `ai-councilを検証して`, `作業場まとめて`, uses direct `JOB_TYPE` lines, uses `VPS Codex Direct`, uses `VPS Quick AI Exec`, uses `VPS AI Exec`, or uses a free-form planning request
 - no passwords, tokens, SSH private keys, API keys, or other secrets were included
 
 If the Issue still has no result comment, check the VPS:
@@ -186,5 +186,5 @@ bash /opt/ai-council/scripts/job_status.sh
 - Do not request `git pull`, `git push`, `npm install`, or `npm ci`.
 - Do not close existing Issues as part of a job request.
 - Free-form requests are planning-first unless they match a known safe job type.
-- Use `VPS Quick AI Exec` or `VPS AI Exec` only when the VPS should actually run the authenticated AI CLI in the workspace.
+- Use `VPS Codex Direct`, `VPS Quick AI Exec`, or `VPS AI Exec` only when the VPS should actually run the authenticated Codex CLI in the workspace.
 - For `VPS AI Exec`, keep the request short enough for one bounded job. The defaults reject Issue bodies over 12000 bytes, stop the AI CLI after 900 seconds, block concurrent `ai_exec` runs, and rate-limit back-to-back `ai_exec` runs for 300 seconds.

@@ -68,7 +68,7 @@ Short casual phrases that include `検証`, `安全確認して`, `安全確認�
 
 ## Send An ai_exec Request
 
-Use the `VPS Quick AI Exec` Issue form for the shortest actual VPS AI CLI request, or the longer `VPS AI Exec` Issue form when you want the full checklist. Both include:
+Use the `VPS Codex Direct` Issue form for the normal Codex-only smartphone lane, `VPS Quick AI Exec` for the older short-form alias, or the longer `VPS AI Exec` Issue form when you want the full checklist. All include:
 
 ```text
 JOB_TYPE=ai_exec

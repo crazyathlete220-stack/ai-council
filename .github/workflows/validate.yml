@@ -27,6 +27,7 @@ jobs:
           test -f docs/mobile-vps-jobs.md
           test -f docs/vps-ai-worker.md
           test -f docs/vps-ai-cli-runner.md
+          test -f docs/vps-codex-direct.md
           test -f docs/vps-claude-code.md
           test -f scripts/setup_workspaces.sh
           test -f scripts/register_workspace.sh
@@ -59,3 +60,4 @@ jobs:
           test -f .github/ISSUE_TEMPLATE/vps-ai-check.yml
           test -f .github/ISSUE_TEMPLATE/vps-ai-exec.yml
           test -f .github/ISSUE_TEMPLATE/vps-quick-ai-exec.yml
+          test -f .github/ISSUE_TEMPLATE/vps-codex-direct.yml
