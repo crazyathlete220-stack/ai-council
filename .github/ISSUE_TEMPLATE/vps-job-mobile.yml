@@ -10,13 +10,14 @@ body:
         Use this form from a smartphone when the PC is closed.
 
         Leave the command as-is for the normal `ai-council` repository check.
+        Use `JOB_TYPE=ai_check` when you want bounded VPS verification only.
         The VPS will post the result back to this Issue.
 
   - type: textarea
     id: command
     attributes:
       label: VPS job command
-      description: Keep these two lines for a normal repository check. Create another Issue for another job.
+      description: Keep these two lines for a normal repository check. Use JOB_TYPE=ai_check for bounded verification only. Create another Issue for another job.
       value: |
         JOB_TYPE=repo_check
         REPO_NAME=ai-council

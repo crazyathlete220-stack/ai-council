@@ -1,0 +1,43 @@
+name: VPS AI Check
+description: Ask the VPS to run bounded repository checks
+title: "[VPS AI Check] ai-councilを確認して"
+labels:
+  - vps-job
+body:
+  - type: markdown
+    attributes:
+      value: |
+        VPSに安全な確認だけを実行させるフォームです。
+
+        このjobはコード編集、install、push、PR作成をしません。
+
+  - type: textarea
+    id: command
+    attributes:
+      label: VPS job command
+      description: 普通はこのまま投稿してください。
+      value: |
+        JOB_TYPE=ai_check
+        REPO_NAME=ai-council
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: request
+    attributes:
+      label: やってほしいこと
+      description: 例: PCを閉じているので、VPS側でai-councilの安全確認をして。
+      placeholder: ai-councilを確認して
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: パスワード、token、SSH秘密鍵、APIキー、その他secretsを書いていません。
+          required: true
+        - label: コード編集、install、git push、PR作成はこのjobでは依頼していません。
+          required: true

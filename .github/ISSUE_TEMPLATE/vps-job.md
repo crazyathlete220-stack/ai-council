@@ -14,6 +14,13 @@ REQUEST_SOURCE=github_issue
 REQUESTED_BY=
 ```
 
+Supported `JOB_TYPE` values:
+
+- `repo_check`
+- `workspace_summary`
+- `ai_plan`
+- `ai_check`
+
 ## Purpose
 
 What should the VPS check?
@@ -27,4 +34,3 @@ Where should the result be reported after `/var/log/ai-council/jobs/latest-job-r
 - Do not include passwords, tokens, SSH private keys, API keys, or other secrets.
 - Do not request arbitrary shell commands.
 - Do not request `git pull`, `git push`, `npm install`, or `npm ci`.
-

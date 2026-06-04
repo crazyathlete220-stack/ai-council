@@ -79,6 +79,21 @@ JOB_TYPE=ai_plan
 REPO_NAME=ai-council
 ```
 
+Casual bounded check examples:
+
+```text
+ai-councilを検証して
+ai-councilをチェックだけして
+PCを閉じているので安全確認して
+```
+
+Direct bounded check command:
+
+```text
+JOB_TYPE=ai_check
+REPO_NAME=ai-council
+```
+
 Casual workspace summary examples:
 
 ```text
@@ -100,7 +115,7 @@ Create one Issue per job. To run the same job again, create a new Issue.
 Wait up to ten minutes, then check the Issue:
 
 - label includes `vps-job`
-- request says `ai-councilの状態見て`, `ai-councilをチェックして`, `作業場まとめて`, or uses direct `JOB_TYPE` lines
+- request says `ai-councilの状態見て`, `ai-councilをチェックして`, `ai-councilを検証して`, `作業場まとめて`, or uses direct `JOB_TYPE` lines
 - no passwords, tokens, SSH private keys, API keys, or other secrets were included
 
 If the Issue still has no result comment, check the VPS:

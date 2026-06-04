@@ -86,12 +86,19 @@ sudo systemctl status ai-council-github-bridge.timer
 
 ## Phase 5 AI Worker
 
-Phase 5 starts moving AI-side planning work toward the VPS. It begins with `ai_plan`, which creates a plan report only. It does not edit files, push branches, create PRs, or move an AI model onto the VPS.
+Phase 5 starts moving AI-side planning and checking work toward the VPS. It begins with `ai_plan`, which creates a plan report only, and `ai_check`, which runs bounded verification only. These jobs do not edit files, push branches, create PRs, or move an AI model onto the VPS.
 
 Start from [docs/vps-ai-worker.md](docs/vps-ai-worker.md). For ChatGPT-created requests, use the `VPS AI Plan` Issue form or include:
 
 ```text
 JOB_TYPE=ai_plan
+REPO_NAME=ai-council
+```
+
+To ask the VPS for a safe check while the PC is closed, use the `VPS AI Check` Issue form or include:
+
+```text
+JOB_TYPE=ai_check
 REPO_NAME=ai-council
 ```
 
@@ -113,6 +120,7 @@ sudo bash scripts/run_job_once.sh
 sudo cat /var/log/ai-council/latest-report.md
 sudo cat /var/log/ai-council/jobs/latest-job-report.md
 sudo cat /var/log/ai-council/ai-worker/latest-plan.md
+sudo cat /var/log/ai-council/ai-worker/latest-check.md
 sudo journalctl -u ai-council-healthcheck.service -n 100 --no-pager
 sudo journalctl -u ai-council-healthcheck.timer -n 100 --no-pager
 sudo journalctl -u ai-council-job-runner.service -n 100 --no-pager
