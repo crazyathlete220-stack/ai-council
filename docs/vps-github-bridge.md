@@ -45,7 +45,7 @@ Supported job types:
 - `ai_plan`
 - `ai_check`
 
-Supported casual phrases are intentionally mapped only to those job types. Phrases with `計画`, `方針`, `plan`, or `プラン` map to `ai_plan`. Phrases with `検証`, `安全確認`, `チェックだけ`, `確認だけ`, or `check only` map to `ai_check`. Unclassified free text maps to `ai_plan` and is not executed as shell.
+Supported casual phrases are intentionally mapped only to those job types. Phrases with `計画`, `方針`, `plan`, or `プラン` map to `ai_plan`. Phrases with `検証`, `安全確認して`, `安全確認を`, `チェックだけ`, `確認だけ`, or `check only` map to `ai_check`. Unclassified free text maps to `ai_plan` and is not executed as shell.
 
 One Issue creates one VPS job. To run another job, create another Issue.
 
