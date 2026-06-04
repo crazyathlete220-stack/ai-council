@@ -50,6 +50,8 @@ Use `VPS AI Exec` when the VPS should run the authenticated AI CLI and may edit 
 
 The Issue template applies the `vps-job` label automatically. The bridge only imports Issues with that label.
 
+The bridge also checks the VPS-side GitHub author allowlist. Your GitHub username must be listed in `/etc/ai-council/github-bridge-allowlist` on the VPS, otherwise the Issue is not converted into a job.
+
 Use `VPS Job Mobile` instead when you want to edit `JOB_TYPE` and `REPO_NAME` directly.
 
 ## Confirm The Result
@@ -141,6 +143,7 @@ Create one Issue per job. To run the same job again, create a new Issue.
 Wait up to ten minutes, then check the Issue:
 
 - label includes `vps-job`
+- your GitHub username is listed in `/etc/ai-council/github-bridge-allowlist` on the VPS
 - request says `ai-councilの状態見て`, `ai-councilをチェックして`, `ai-councilを検証して`, `作業場まとめて`, uses direct `JOB_TYPE` lines, uses `VPS AI Exec`, or uses a free-form planning request
 - no passwords, tokens, SSH private keys, API keys, or other secrets were included
 
@@ -149,6 +152,7 @@ If the Issue still has no result comment, check the VPS:
 ```bash
 systemctl status ai-council-github-bridge.timer
 sudo journalctl -u ai-council-github-bridge.service -n 100 --no-pager
+sudo tail -n 50 /var/log/ai-council/github-bridge/rejected-issues.log
 bash /opt/ai-council/scripts/job_status.sh
 ```
 
@@ -160,3 +164,4 @@ bash /opt/ai-council/scripts/job_status.sh
 - Do not close existing Issues as part of a job request.
 - Free-form requests are planning-first unless they match a known safe job type.
 - Use `VPS AI Exec` only when the VPS should actually run the authenticated AI CLI in the workspace.
+- For `VPS AI Exec`, keep the request short enough for one bounded job. The defaults reject Issue bodies over 12000 bytes, stop the AI CLI after 900 seconds, block concurrent `ai_exec` runs, and rate-limit back-to-back `ai_exec` runs for 300 seconds.

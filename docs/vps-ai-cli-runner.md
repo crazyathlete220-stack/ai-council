@@ -17,6 +17,41 @@ This is still not an AI model host. The model runs through the external AI servi
 - Free-form Issue text is passed to the AI CLI as a request, not executed as shell.
 - The runner defaults to Codex CLI. Claude Code is checked by `ai_cli_status.sh`, but execution is not enabled in this phase.
 - The default Codex model is `gpt-5.5`. Override `AI_COUNCIL_AI_MODEL` only when the target Codex account supports the requested model.
+- GitHub Issue input is limited before the AI CLI starts.
+- The AI CLI process is run with a timeout.
+- Concurrent `ai_exec` jobs are blocked and back-to-back `ai_exec` jobs are rate-limited.
+
+## Default Guardrails
+
+The default safety limits are:
+
+```text
+AI_COUNCIL_AI_EXEC_MAX_ISSUE_BODY_BYTES=12000
+AI_COUNCIL_AI_EXEC_TIMEOUT_SECONDS=900
+AI_COUNCIL_AI_EXEC_MIN_INTERVAL_SECONDS=300
+AI_COUNCIL_AI_EXEC_GUARD_ROOT=/var/lib/ai-council/ai-exec
+```
+
+Override these only as VPS-side environment variables. Do not commit secrets or account credentials into repository files.
+
+Guardrail evidence appears in `/var/log/ai-council/ai-cli/latest-exec.md` as:
+
+```text
+Max Issue Body Bytes:
+Issue Body Bytes:
+Timeout Seconds:
+Minimum Interval Seconds:
+Guard Status:
+```
+
+Blocked `ai_exec` signals include:
+
+```text
+AI_EXEC_STATUS: INPUT_TOO_LARGE
+AI_EXEC_STATUS: RATE_LIMITED
+AI_EXEC_STATUS: TIMEOUT
+AI_EXEC_STATUS: GUARD_UNAVAILABLE
+```
 
 ## VPS Setup
 

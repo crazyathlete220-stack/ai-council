@@ -11,6 +11,8 @@ body:
 
         `ai_exec` はVPS上の登録workspace内でファイル編集や検証を行う可能性があります。
         `git push`、PR作成、secrets作成は行いません。
+        VPS側のGitHub username allowlistに含まれる投稿者だけがjob化されます。
+        依頼文が長すぎる場合、連投の場合、実行が長すぎる場合はguardrailで止まります。
 
   - type: textarea
     id: command
@@ -42,4 +44,6 @@ body:
         - label: パスワード、token、SSH秘密鍵、APIキー、その他secretsを書いていません。
           required: true
         - label: git push、PR作成、secrets作成、任意の危険なshell実行は依頼していません。
+          required: true
+        - label: VPS側のallowlistとai_exec guardrailにより、この依頼が拒否される場合があることを理解しています。
           required: true

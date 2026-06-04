@@ -7,9 +7,12 @@ LABEL="${AI_COUNCIL_GITHUB_JOB_LABEL:-vps-job}"
 STATE_ROOT="${AI_COUNCIL_GITHUB_BRIDGE_STATE_ROOT:-/var/lib/ai-council/github-bridge}"
 LOG_DIR="${AI_COUNCIL_GITHUB_BRIDGE_LOG_DIR:-/var/log/ai-council/github-bridge}"
 IMPORT_DIR="${STATE_ROOT}/imported"
+REJECT_DIR="${STATE_ROOT}/rejected"
+REJECT_LOG="${LOG_DIR}/rejected-issues.log"
+ALLOWLIST_FILE="${AI_COUNCIL_GITHUB_ALLOWED_USERS_FILE:-/etc/ai-council/github-bridge-allowlist}"
 MAX_ISSUES="${AI_COUNCIL_GITHUB_IMPORT_LIMIT:-20}"
 
-mkdir -p "${IMPORT_DIR}" "${LOG_DIR}"
+mkdir -p "${IMPORT_DIR}" "${REJECT_DIR}" "${LOG_DIR}"
 
 derive_casual_job() {
   local request_text="$1"
@@ -44,6 +47,68 @@ derive_casual_job() {
   return 1
 }
 
+author_allowed() {
+  local author="$1"
+  local author_lc=""
+  local allowed_seen=0
+  local line=""
+  local line_lc=""
+
+  if [[ ! -r "${ALLOWLIST_FILE}" ]]; then
+    return 2
+  fi
+
+  author_lc="$(printf "%s" "${author}" | tr "[:upper:]" "[:lower:]")"
+
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    line="${line%%#*}"
+    line="$(printf "%s" "${line}" | tr -d "[:space:]")"
+
+    if [[ -z "${line}" ]]; then
+      continue
+    fi
+
+    allowed_seen=1
+
+    if [[ ! "${line}" =~ ^[A-Za-z0-9-]+$ ]]; then
+      continue
+    fi
+
+    line_lc="$(printf "%s" "${line}" | tr "[:upper:]" "[:lower:]")"
+    if [[ "${line_lc}" == "${author_lc}" ]]; then
+      return 0
+    fi
+  done < "${ALLOWLIST_FILE}"
+
+  if [[ "${allowed_seen}" -eq 0 ]]; then
+    return 3
+  fi
+
+  return 1
+}
+
+reject_issue() {
+  local issue_number="$1"
+  local issue_author="$2"
+  local reason="$3"
+  local rejected_marker="${REJECT_DIR}/issue-${issue_number}.rejected"
+
+  if [[ ! -f "${rejected_marker}" ]]; then
+    {
+      printf "REJECTED_AT=%s\n" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+      printf "ISSUE_NUMBER=%s\n" "${issue_number}"
+      printf "ISSUE_AUTHOR=%s\n" "${issue_author}"
+      printf "REASON=%s\n" "${reason}"
+    } > "${rejected_marker}"
+
+    printf "%s issue=%s author=%s reason=%s\n" \
+      "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+      "${issue_number}" \
+      "${issue_author}" \
+      "${reason}" >> "${REJECT_LOG}"
+  fi
+}
+
 if ! command -v gh >/dev/null 2>&1; then
   echo "GITHUB_JOB_IMPORT_STATUS: AUTH_REQUIRED"
   echo "Reason: gh command is not installed on the VPS."
@@ -72,6 +137,8 @@ fi
 
 imported_count=0
 skipped_count=0
+rejected_count=0
+allowlist_required_count=0
 
 for row in $(printf "%s" "${issues_json}" | jq -r '.[] | @base64'); do
   issue_json="$(printf "%s" "${row}" | base64 -d)"
@@ -85,6 +152,44 @@ for row in $(printf "%s" "${issues_json}" | jq -r '.[] | @base64'); do
     skipped_count=$((skipped_count + 1))
     continue
   fi
+
+  allow_status=0
+  author_allowed "${issue_author}" || allow_status=$?
+
+  case "${allow_status}" in
+    0)
+      ;;
+    1)
+      echo "Rejecting issue #${issue_number}: author is not in GitHub allowlist"
+      reject_issue "${issue_number}" "${issue_author}" "author_not_allowed"
+      rejected_count=$((rejected_count + 1))
+      skipped_count=$((skipped_count + 1))
+      continue
+      ;;
+    2)
+      echo "Rejecting issue #${issue_number}: GitHub allowlist file is not readable: ${ALLOWLIST_FILE}"
+      reject_issue "${issue_number}" "${issue_author}" "allowlist_file_missing"
+      rejected_count=$((rejected_count + 1))
+      allowlist_required_count=$((allowlist_required_count + 1))
+      skipped_count=$((skipped_count + 1))
+      continue
+      ;;
+    3)
+      echo "Rejecting issue #${issue_number}: GitHub allowlist file is empty: ${ALLOWLIST_FILE}"
+      reject_issue "${issue_number}" "${issue_author}" "allowlist_empty"
+      rejected_count=$((rejected_count + 1))
+      allowlist_required_count=$((allowlist_required_count + 1))
+      skipped_count=$((skipped_count + 1))
+      continue
+      ;;
+    *)
+      echo "Rejecting issue #${issue_number}: GitHub allowlist check failed"
+      reject_issue "${issue_number}" "${issue_author}" "allowlist_check_failed"
+      rejected_count=$((rejected_count + 1))
+      skipped_count=$((skipped_count + 1))
+      continue
+      ;;
+  esac
 
   job_type="$(printf "%s\n" "${issue_body}" | awk -F= '/^JOB_TYPE=/{print $2; exit}' | tr -d '[:space:]')"
   repo_name="$(printf "%s\n" "${issue_body}" | awk -F= '/^REPO_NAME=/{print $2; exit}' | tr -d '[:space:]')"
@@ -159,4 +264,11 @@ done
 
 echo "Imported: ${imported_count}"
 echo "Skipped: ${skipped_count}"
-echo "GITHUB_JOB_IMPORT_STATUS: OK"
+echo "Rejected: ${rejected_count}"
+echo "Allowlist File: ${ALLOWLIST_FILE}"
+
+if [[ "${imported_count}" -eq 0 && "${allowlist_required_count}" -gt 0 ]]; then
+  echo "GITHUB_JOB_IMPORT_STATUS: ALLOWLIST_REQUIRED"
+else
+  echo "GITHUB_JOB_IMPORT_STATUS: OK"
+fi

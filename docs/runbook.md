@@ -191,13 +191,41 @@ gh auth status --hostname github.com
 
 If either command fails, the bridge reports `AUTH_REQUIRED`. Configure GitHub authentication outside this repository.
 
+### Check GitHub Author Allowlist
+
+```bash
+sudo test -f /etc/ai-council/github-bridge-allowlist
+sudo cat /etc/ai-council/github-bridge-allowlist
+```
+
+The bridge is default-deny. If the file is missing or empty, GitHub Issue imports are refused with:
+
+```text
+GITHUB_JOB_IMPORT_STATUS: ALLOWLIST_REQUIRED
+```
+
+Create the VPS-side allowlist outside the repository:
+
+```bash
+sudo install -d -m 0755 /etc/ai-council
+printf '%s\n' '<GITHUB_USERNAME>' | sudo tee /etc/ai-council/github-bridge-allowlist >/dev/null
+sudo chmod 0644 /etc/ai-council/github-bridge-allowlist
+```
+
+Rejected Issue evidence:
+
+```bash
+sudo tail -n 50 /var/log/ai-council/github-bridge/rejected-issues.log
+sudo ls -la /var/lib/ai-council/github-bridge/rejected
+```
+
 ### Import GitHub Jobs
 
 ```bash
 sudo bash scripts/import_github_jobs.sh
 ```
 
-Expected result: `GITHUB_JOB_IMPORT_STATUS: OK`, `NO_MATCHING_ISSUES`, or `AUTH_REQUIRED`.
+Expected result: `GITHUB_JOB_IMPORT_STATUS: OK`, `NO_MATCHING_ISSUES`, `AUTH_REQUIRED`, or `ALLOWLIST_REQUIRED`.
 
 ### Post Latest Job Result
 
@@ -320,6 +348,21 @@ sudo grep -E "AI_EXEC_STATUS|JOB_RUNNER_STATUS|Exec File|Latest Exec|CLI Provide
 ```
 
 `ai_exec` may edit files in the registered VPS workspace, but it does not run `git push`, create PRs, or create secrets.
+
+Blocked guardrail statuses are expected when a request is too large, too frequent, concurrent, or long-running:
+
+```text
+AI_EXEC_STATUS: INPUT_TOO_LARGE
+AI_EXEC_STATUS: RATE_LIMITED
+AI_EXEC_STATUS: TIMEOUT
+AI_EXEC_STATUS: GUARD_UNAVAILABLE
+```
+
+Check the current limits and guard evidence:
+
+```bash
+sudo grep -E "AI_EXEC_STATUS|Status Reason|Guard Status|Max Issue Body Bytes|Issue Body Bytes|Timeout Seconds|Minimum Interval Seconds" /var/log/ai-council/ai-cli/latest-exec.md
+```
 
 ### Review Workspace Diff
 
