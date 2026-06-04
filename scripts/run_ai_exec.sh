@@ -192,10 +192,10 @@ elif ! sudo -H -u "${operator_user}" "${codex_bin}" login status >/dev/null 2>&1
   cli_exit=1
 else
   codex_args=(
+    --ask-for-approval "${codex_approval}"
     exec
     --cd "${repo_path}"
     --sandbox "${codex_sandbox}"
-    --ask-for-approval "${codex_approval}"
     --output-last-message "${last_message}"
   )
 
