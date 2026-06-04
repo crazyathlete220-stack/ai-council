@@ -148,7 +148,7 @@ install -d -m 0755 "${plan_dir}"
   echo
   echo "1. Confirm the request scope and target repository."
   echo "2. Read the relevant repository docs and current workspace status."
-  echo "3. Identify the smallest safe next job type: ai_check, ai_patch, or ai_pr."
+  echo "3. Identify the smallest safe next job type: ai_check, ai_exec, ai_patch, or ai_pr."
   echo "4. Record expected verification commands before any future code change."
   echo "5. Ask for human approval before moving from planning to patch or PR creation."
   echo
@@ -166,7 +166,7 @@ install -d -m 0755 "${plan_dir}"
   echo
   echo "## Unconfirmed"
   echo
-  echo "- VPS AI CLI execution is not confirmed."
+  echo "- VPS AI CLI execution is confirmed only after an ai_exec job reports AI_EXEC_STATUS: OK."
   echo "- Code editing on the VPS is not enabled by this job."
   echo "- Git push and PR creation from the VPS are not enabled by this job."
   echo

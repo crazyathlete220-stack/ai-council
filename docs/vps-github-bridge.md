@@ -44,8 +44,11 @@ Supported job types:
 - `workspace_summary`
 - `ai_plan`
 - `ai_check`
+- `ai_exec`
 
 Supported casual phrases are intentionally mapped only to those job types. Phrases with `計画`, `方針`, `plan`, or `プラン` map to `ai_plan`. Phrases with `検証`, `安全確認して`, `安全確認を`, `チェックだけ`, `確認だけ`, or `check only` map to `ai_check`. Unclassified free text maps to `ai_plan` and is not executed as shell.
+
+`ai_exec` is not selected by casual phrase matching. Use the `VPS AI Exec` Issue form or explicit `JOB_TYPE=ai_exec` when the VPS should run the authenticated AI CLI.
 
 One Issue creates one VPS job. To run another job, create another Issue.
 

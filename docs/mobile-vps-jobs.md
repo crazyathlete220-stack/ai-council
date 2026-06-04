@@ -20,7 +20,7 @@ Open GitHub on the smartphone, then:
 1. open `crazyathlete220-stack/ai-council`
 2. open `Issues`
 3. tap `New issue`
-4. choose `VPS Free Request` for natural-language instructions, or `VPS Job Casual` for a known short request
+4. choose `VPS Free Request` for natural-language planning, `VPS AI Exec` for actual VPS AI CLI work, or `VPS Job Casual` for a known short request
 5. write the request naturally, such as `PCを閉じているので、次に安全に進める作業を整理して`
 6. submit the Issue
 
@@ -45,6 +45,8 @@ REPO_NAME=ai-council
 ```
 
 This fallback creates planning evidence only. It does not execute the free-form text as shell.
+
+Use `VPS AI Exec` when the VPS should run the authenticated AI CLI and may edit files in the registered workspace. This route does not run `git push`, create PRs, or create secrets.
 
 The Issue template applies the `vps-job` label automatically. The bridge only imports Issues with that label.
 
@@ -111,6 +113,13 @@ JOB_TYPE=ai_check
 REPO_NAME=ai-council
 ```
 
+Direct AI CLI execution command:
+
+```text
+JOB_TYPE=ai_exec
+REPO_NAME=ai-council
+```
+
 Casual workspace summary examples:
 
 ```text
@@ -132,7 +141,7 @@ Create one Issue per job. To run the same job again, create a new Issue.
 Wait up to ten minutes, then check the Issue:
 
 - label includes `vps-job`
-- request says `ai-councilの状態見て`, `ai-councilをチェックして`, `ai-councilを検証して`, `作業場まとめて`, uses direct `JOB_TYPE` lines, or uses a free-form planning request
+- request says `ai-councilの状態見て`, `ai-councilをチェックして`, `ai-councilを検証して`, `作業場まとめて`, uses direct `JOB_TYPE` lines, uses `VPS AI Exec`, or uses a free-form planning request
 - no passwords, tokens, SSH private keys, API keys, or other secrets were included
 
 If the Issue still has no result comment, check the VPS:
@@ -150,3 +159,4 @@ bash /opt/ai-council/scripts/job_status.sh
 - Do not request `git pull`, `git push`, `npm install`, or `npm ci`.
 - Do not close existing Issues as part of a job request.
 - Free-form requests are planning-first unless they match a known safe job type.
+- Use `VPS AI Exec` only when the VPS should actually run the authenticated AI CLI in the workspace.

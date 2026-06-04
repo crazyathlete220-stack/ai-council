@@ -51,7 +51,7 @@ body="$(
   {
     echo "## VPS job result"
     echo
-    grep -E "Generated At|Job ID|Job Type|Repo Name|Repo Path|Plan File|Latest Plan|Check File|Latest Check|REPO_CHECK_STATUS|WORKSPACE_SUMMARY_STATUS|AI_PLAN_STATUS|AI_CHECK_STATUS|JOB_RUNNER_STATUS" "${LATEST_REPORT}" || true
+    grep -E "Generated At|Job ID|Job Type|Repo Name|Repo Path|Plan File|Latest Plan|Check File|Latest Check|Exec File|Latest Exec|CLI Provider|REPO_CHECK_STATUS|WORKSPACE_SUMMARY_STATUS|AI_PLAN_STATUS|AI_CHECK_STATUS|AI_EXEC_STATUS|JOB_RUNNER_STATUS" "${LATEST_REPORT}" || true
     echo
     echo "Evidence:"
     echo "- VPS latest job report: ${LATEST_REPORT}"

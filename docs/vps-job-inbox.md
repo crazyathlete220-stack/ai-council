@@ -61,6 +61,7 @@ Supported `JOB_TYPE` values:
 - `workspace_summary`
 - `ai_plan`
 - `ai_check`
+- `ai_exec`
 
 ## Create A Job
 
@@ -86,6 +87,12 @@ AI worker bounded check:
 
 ```bash
 bash scripts/create_job.sh ai_check ai-council
+```
+
+AI CLI execution:
+
+```bash
+sudo bash scripts/create_job.sh ai_exec ai-council
 ```
 
 If the queue directory is root-owned, run the same command with `sudo`.
@@ -121,6 +128,7 @@ This phase creates the safe inbox and execution package. GitHub authentication s
 - Do not put passwords, GitHub tokens, SSH private keys, or API keys in job files.
 - Do not use the job inbox for arbitrary shell commands.
 - Do not run `git pull`, `git push`, `npm install`, or `npm ci` from the job runner.
+- `ai_exec` may edit files in the registered workspace, but it still must not run `git push` or create secrets.
 - Do not delete workspace roots as part of normal recovery.
 - Keep one job active at a time so evidence remains easy to inspect.
 

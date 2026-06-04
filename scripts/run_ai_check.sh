@@ -202,7 +202,7 @@ install -d -m 0755 "${check_dir}"
   echo "- This job does not run install commands."
   echo "- This job does not push branches or create PRs."
   echo "- Free-form Issue text is not executed as shell."
-  echo "- AI CLI execution on the VPS is not confirmed in this phase."
+  echo "- AI CLI execution on the VPS is confirmed only after an ai_exec job reports AI_EXEC_STATUS: OK."
   echo
 
   if [[ "${repo_exists}" != "yes" ]]; then

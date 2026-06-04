@@ -11,13 +11,14 @@ body:
 
         Leave the command as-is for the normal `ai-council` repository check.
         Use `JOB_TYPE=ai_check` when you want bounded VPS verification only.
+        Use `VPS AI Exec` instead when the VPS should run the authenticated AI CLI.
         The VPS will post the result back to this Issue.
 
   - type: textarea
     id: command
     attributes:
       label: VPS job command
-      description: Keep these two lines for a normal repository check. Use JOB_TYPE=ai_check for bounded verification only. Create another Issue for another job.
+      description: Keep these two lines for a normal repository check. Use JOB_TYPE=ai_check for bounded verification only, or JOB_TYPE=ai_exec for explicit AI CLI execution.
       value: |
         JOB_TYPE=repo_check
         REPO_NAME=ai-council
@@ -43,3 +44,5 @@ body:
           required: true
         - label: I am not asking the VPS to run arbitrary shell commands.
           required: true
+        - label: If I use JOB_TYPE=ai_exec, I allow the VPS AI CLI to work only inside the registered workspace.
+          required: false
