@@ -16,6 +16,7 @@ This is still not an AI model host. The model runs through the external AI servi
 - `ai_exec` does not create GitHub tokens, SSH private keys, API keys, passwords, or secrets.
 - Free-form Issue text is passed to the AI CLI as a request, not executed as shell.
 - The runner defaults to Codex CLI. Claude Code is checked by `ai_cli_status.sh`, but execution is not enabled in this phase.
+- The default Codex model is `gpt-5.5`. Override `AI_COUNCIL_AI_MODEL` only when the target Codex account supports the requested model.
 
 ## VPS Setup
 
