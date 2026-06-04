@@ -119,6 +119,9 @@ ${issue_body}"; then
     ai_check)
       repo_name="${repo_name:-ai-council}"
       ;;
+    ai_exec)
+      repo_name="${repo_name:-ai-council}"
+      ;;
     *)
       echo "Skipping issue #${issue_number}: unsupported or missing JOB_TYPE"
       skipped_count=$((skipped_count + 1))

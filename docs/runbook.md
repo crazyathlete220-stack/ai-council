@@ -280,6 +280,58 @@ sudo grep -E "AI_CHECK_STATUS|JOB_RUNNER_STATUS|Check File|Latest Check" /var/lo
 
 `ai_check` runs bounded checks only. It does not edit files, run install commands, push branches, create PRs, or execute free-form Issue text as shell.
 
+## AI CLI Runner Recovery
+
+### Check AI CLI Readiness
+
+```bash
+sudo bash /opt/ai-council/scripts/setup_ai_cli_runner.sh ai-council
+bash /opt/ai-council/scripts/ai_cli_status.sh ai-council
+```
+
+Expected result:
+
+```text
+AI_CLI_STATUS: READY
+```
+
+If the status is `NOT_READY`, check whether Codex CLI is installed and authenticated for the `ai-council` operator user on the VPS. Configure authentication outside this repository.
+
+### Create An AI Exec Job
+
+```bash
+sudo bash /opt/ai-council/scripts/create_job.sh ai_exec ai-council
+sudo bash /opt/ai-council/scripts/run_job_once.sh
+sudo bash /opt/ai-council/scripts/report_job_result.sh
+```
+
+Expected result:
+
+```text
+AI_EXEC_STATUS: OK
+JOB_RUNNER_STATUS: OK
+```
+
+### Check AI Exec Evidence
+
+```bash
+sudo cat /var/log/ai-council/ai-cli/latest-exec.md
+sudo grep -E "AI_EXEC_STATUS|JOB_RUNNER_STATUS|Exec File|Latest Exec|CLI Provider" /var/log/ai-council/jobs/latest-job-report.md
+```
+
+`ai_exec` may edit files in the registered VPS workspace, but it does not run `git push`, create PRs, or create secrets.
+
+### Review Workspace Diff
+
+```bash
+cd /opt/ai-workspaces/ai-council
+git status --short
+git diff --stat
+git diff
+```
+
+Do not push from the VPS until a separate PR creation phase is reviewed.
+
 ## GitHub Report Template
 
 ```md

@@ -45,6 +45,9 @@ Next confirmation commands:
   bash scripts/create_job.sh repo_check <REPO_NAME>
   bash scripts/create_job.sh ai_plan ai-council
   bash scripts/create_job.sh ai_check ai-council
+  sudo bash scripts/setup_ai_cli_runner.sh ai-council
+  bash scripts/ai_cli_status.sh ai-council
+  sudo bash scripts/create_job.sh ai_exec ai-council
   sudo bash scripts/run_job_once.sh
   sudo bash scripts/report_job_result.sh
 EOF

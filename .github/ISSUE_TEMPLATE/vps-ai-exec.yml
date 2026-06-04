@@ -1,0 +1,45 @@
+name: VPS AI Exec
+description: Ask the VPS to run an authenticated AI CLI in the workspace
+title: "[VPS AI Exec] "
+labels:
+  - vps-job
+body:
+  - type: markdown
+    attributes:
+      value: |
+        VPS上の認証済みAI CLIに、実際の作業を依頼するフォームです。
+
+        `ai_exec` はVPS上の登録workspace内でファイル編集や検証を行う可能性があります。
+        `git push`、PR作成、secrets作成は行いません。
+
+  - type: textarea
+    id: command
+    attributes:
+      label: VPS job command
+      description: 通常はこのまま使います。
+      value: |
+        JOB_TYPE=ai_exec
+        REPO_NAME=ai-council
+    validations:
+      required: true
+
+  - type: textarea
+    id: request
+    attributes:
+      label: やってほしいこと
+      description: 自然な文章で書けます。secretsやパスワードは書かないでください。
+      placeholder: READMEの案内を読みやすく直して、bash syntax checkまで実行して。
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: VPS上の登録workspace内でAI CLIが作業することを許可しています。
+          required: true
+        - label: パスワード、token、SSH秘密鍵、APIキー、その他secretsを書いていません。
+          required: true
+        - label: git push、PR作成、secrets作成、任意の危険なshell実行は依頼していません。
+          required: true

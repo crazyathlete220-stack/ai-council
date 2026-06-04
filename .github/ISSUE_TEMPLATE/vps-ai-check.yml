@@ -27,7 +27,7 @@ body:
     id: request
     attributes:
       label: やってほしいこと
-      description: 例: PCを閉じているので、VPS側でai-councilの安全確認をして。
+      description: "例: PCを閉じているので、VPS側でai-councilの安全確認をして。"
       placeholder: ai-councilを確認して
     validations:
       required: false

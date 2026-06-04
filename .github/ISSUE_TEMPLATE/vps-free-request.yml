@@ -11,6 +11,7 @@ body:
 
         分類できない自由文は `ai_plan` として扱われ、計画レポートだけを作ります。
         Issue本文はshellとして実行されません。
+        実際にVPS上のAI CLIへ作業させる場合は `VPS AI Exec` フォームを使ってください。
 
   - type: textarea
     id: request

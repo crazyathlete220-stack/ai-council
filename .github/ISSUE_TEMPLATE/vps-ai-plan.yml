@@ -27,7 +27,7 @@ body:
     id: request
     attributes:
       label: やってほしいこと
-      description: 例: PC負荷を下げるため、次にVPSへ移す作業を整理して。
+      description: "例: PC負荷を下げるため、次にVPSへ移す作業を整理して。"
       placeholder: ai-councilの次の作業計画を立てて
     validations:
       required: false

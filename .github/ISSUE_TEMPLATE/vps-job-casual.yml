@@ -11,6 +11,7 @@ body:
 
         今は決まった言い方だけを、許可済みjobへ変換します。
         自由に書きたい場合は `VPS Free Request` を使ってください。
+        実作業をVPS上のAI CLIへ依頼する場合は `VPS AI Exec` を使ってください。
 
   - type: textarea
     id: request

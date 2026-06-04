@@ -42,6 +42,7 @@ DOC_FILES=(
   "vps-github-bridge.md"
   "mobile-vps-jobs.md"
   "vps-ai-worker.md"
+  "vps-ai-cli-runner.md"
 )
 
 SCRIPT_FILES=(
@@ -59,6 +60,9 @@ SCRIPT_FILES=(
   "report_job_result.sh"
   "run_ai_plan.sh"
   "run_ai_check.sh"
+  "setup_ai_cli_runner.sh"
+  "ai_cli_status.sh"
+  "run_ai_exec.sh"
   "import_github_jobs.sh"
   "post_job_result_to_github.sh"
 )
@@ -104,6 +108,9 @@ Phase 3 operator commands, after review:
   bash ${APP_DIR}/scripts/create_job.sh repo_check <REPO_NAME>
   bash ${APP_DIR}/scripts/create_job.sh ai_plan ai-council
   bash ${APP_DIR}/scripts/create_job.sh ai_check ai-council
+  sudo bash ${APP_DIR}/scripts/setup_ai_cli_runner.sh ai-council
+  bash ${APP_DIR}/scripts/ai_cli_status.sh ai-council
+  bash ${APP_DIR}/scripts/create_job.sh ai_exec ai-council
   sudo bash ${APP_DIR}/scripts/run_job_once.sh
   sudo bash ${APP_DIR}/scripts/report_job_result.sh
   sudo systemctl enable --now ${JOB_TIMER_NAME}

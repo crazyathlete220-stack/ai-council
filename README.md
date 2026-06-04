@@ -104,6 +104,26 @@ REPO_NAME=ai-council
 
 For a free-form request, use the `VPS Free Request` Issue form. If the bridge cannot classify the text as a known check or summary request, it routes the request to `ai_plan` and creates planning evidence only.
 
+## Phase 8 AI CLI Runner
+
+Phase 8 starts moving the actual AI work session to the VPS. It adds `ai_exec`, which can run an already-authenticated Codex CLI as the `ai-council` operator user inside a registered VPS workspace.
+
+Start from [docs/vps-ai-cli-runner.md](docs/vps-ai-cli-runner.md). The setup entry point on the VPS is:
+
+```bash
+sudo bash scripts/setup_ai_cli_runner.sh ai-council
+bash scripts/ai_cli_status.sh ai-council
+```
+
+For smartphone requests that should actually run the VPS AI CLI, use the `VPS AI Exec` Issue form or include:
+
+```text
+JOB_TYPE=ai_exec
+REPO_NAME=ai-council
+```
+
+`ai_exec` may edit files in the VPS workspace, but it does not run `git push`, create PRs, or create secrets. It is not an AI model host; the VPS runs the CLI and workspace operations.
+
 ## Verification Commands
 
 ```bash
@@ -123,6 +143,7 @@ sudo cat /var/log/ai-council/latest-report.md
 sudo cat /var/log/ai-council/jobs/latest-job-report.md
 sudo cat /var/log/ai-council/ai-worker/latest-plan.md
 sudo cat /var/log/ai-council/ai-worker/latest-check.md
+sudo cat /var/log/ai-council/ai-cli/latest-exec.md
 sudo journalctl -u ai-council-healthcheck.service -n 100 --no-pager
 sudo journalctl -u ai-council-healthcheck.timer -n 100 --no-pager
 sudo journalctl -u ai-council-job-runner.service -n 100 --no-pager
@@ -144,4 +165,5 @@ sudo journalctl -u ai-council-github-bridge.service -n 100 --no-pager
 - GitHub bridge: `docs/vps-github-bridge.md`
 - Mobile VPS jobs: `docs/mobile-vps-jobs.md`
 - VPS AI worker: `docs/vps-ai-worker.md`
+- VPS AI CLI runner: `docs/vps-ai-cli-runner.md`
 - GitHub bridge state: `/var/lib/ai-council/github-bridge/`

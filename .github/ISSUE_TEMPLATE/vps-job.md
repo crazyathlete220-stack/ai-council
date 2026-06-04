@@ -20,6 +20,7 @@ Supported `JOB_TYPE` values:
 - `workspace_summary`
 - `ai_plan`
 - `ai_check`
+- `ai_exec`
 
 ## Purpose
 
@@ -34,3 +35,4 @@ Where should the result be reported after `/var/log/ai-council/jobs/latest-job-r
 - Do not include passwords, tokens, SSH private keys, API keys, or other secrets.
 - Do not request arbitrary shell commands.
 - Do not request `git pull`, `git push`, `npm install`, or `npm ci`.
+- Use `JOB_TYPE=ai_exec` only when the VPS should run the authenticated AI CLI inside the registered workspace.
