@@ -8,4 +8,5 @@ Type=oneshot
 WorkingDirectory=/opt/ai-council
 Environment=HOME=/root
 Environment=XDG_CONFIG_HOME=/root/.config
+EnvironmentFile=-/etc/ai-council/github-bridge.env
 ExecStart=/opt/ai-council/scripts/run_job_cycle.sh
