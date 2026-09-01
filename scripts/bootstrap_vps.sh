@@ -40,6 +40,7 @@ DOC_FILES=(
   "vps-ai-operator.md"
   "vps-job-inbox.md"
   "vps-github-bridge.md"
+  "vps-bridge-recovery.md"
   "mobile-vps-jobs.md"
   "vps-ai-worker.md"
   "vps-ai-cli-runner.md"
@@ -134,6 +135,9 @@ To restore and register a private workspace through an existing authenticated gh
 
 To retry an imported failed/deferred Issue without creating a duplicate job:
   sudo bash ${APP_DIR}/scripts/requeue_github_issue.sh <ISSUE_NUMBER>
+
+Full recovery runbook:
+  ${APP_DIR}/docs/vps-bridge-recovery.md
 
 Claude Code readiness, before any manual install decision:
   bash ${APP_DIR}/scripts/claude_code_readiness.sh
