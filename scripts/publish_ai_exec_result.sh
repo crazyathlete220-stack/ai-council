@@ -8,8 +8,11 @@ usage() {
   echo "Usage: sudo bash scripts/publish_ai_exec_result.sh <JOB_REPORT_FILE>" >&2
 }
 
-append_report() {
-  printf '%s\n' "$1" >>"${REPORT_FILE}"
+append_report_once() {
+  local line="$1"
+  if ! grep -Fqx -- "${line}" "${REPORT_FILE}" 2>/dev/null; then
+    printf '%s\n' "${line}" >>"${REPORT_FILE}"
+  fi
 }
 
 finish_status() {
@@ -18,7 +21,7 @@ finish_status() {
 
   [[ -n "${message}" ]] && echo "${message}"
   echo "PUBLISH_STATUS: ${status}"
-  append_report "PUBLISH_STATUS: ${status}"
+  printf '%s\n' "PUBLISH_STATUS: ${status}" >>"${REPORT_FILE}"
 }
 
 if [[ "${EUID}" -ne 0 ]]; then
@@ -31,6 +34,15 @@ if [[ -z "${REPORT_FILE}" || ! -r "${REPORT_FILE}" || ! -w "${REPORT_FILE}" ]]; 
   echo "ERROR: report file must be readable and writable" >&2
   exit 1
 fi
+
+existing_publish_status="$(awk -F': ' '/^PUBLISH_STATUS:/{print $2}' "${REPORT_FILE}" | tail -n 1 | tr -d '[:space:]')"
+case "${existing_publish_status}" in
+  OK | NO_COMMIT | NOT_APPLICABLE)
+    echo "Publication already reached a terminal state: ${existing_publish_status}"
+    echo "PUBLISH_STATUS: ${existing_publish_status}"
+    exit 0
+    ;;
+esac
 
 job_id="$(awk -F': ' '/^- Job ID:/{print $2; exit}' "${REPORT_FILE}")"
 job_type="$(awk -F': ' '/^- Job Type:/{print $2; exit}' "${REPORT_FILE}")"
@@ -93,6 +105,12 @@ if ! git -c safe.directory="${repo_path}" -C "${repo_path}" cat-file -e "${commi
   exit 1
 fi
 
+head_sha="$(git -c safe.directory="${repo_path}" -C "${repo_path}" rev-parse HEAD 2>/dev/null || true)"
+if [[ "${head_sha}" != "${commit_sha}" ]]; then
+  finish_status "ERROR" "Workspace HEAD does not match the reported commit; publication was refused."
+  exit 1
+fi
+
 if [[ -n "$(git -c safe.directory="${repo_path}" -C "${repo_path}" status --porcelain 2>/dev/null)" ]]; then
   finish_status "ERROR" "Workspace is dirty after a successful job; publication was refused."
   exit 1
@@ -124,7 +142,12 @@ if ! command -v gh >/dev/null 2>&1 || ! gh auth status --hostname github.com >/d
   exit 1
 fi
 
-branch_suffix="$(printf '%s' "${job_id}" | tr ':' '-')"
+if ! gh auth setup-git --hostname github.com >/dev/null 2>&1; then
+  finish_status "ERROR" "GitHub CLI could not configure Git credential use."
+  exit 1
+fi
+
+branch_suffix="$(printf '%s' "${job_id}" | sed -E 's/[^A-Za-z0-9._-]+/-/g')"
 publish_branch="ai-council/job-${branch_suffix}"
 default_branch="$(gh repo view "${repository}" --json defaultBranchRef --jq '.defaultBranchRef.name' 2>/dev/null || true)"
 default_branch="${default_branch:-main}"
@@ -151,13 +174,14 @@ if [[ -z "${pr_url}" ]]; then
     --body "Automated AI Council result branch. Review the diff and source Issue evidence before merging. No direct push to the default branch was performed." 2>/dev/null || true)"
 fi
 
+append_report_once "- Publish Repository: ${repository}"
+append_report_once "- Publish Branch: ${publish_branch}"
+append_report_once "- Publish Commit: ${commit_sha}"
+
 if [[ -z "${pr_url}" ]]; then
   finish_status "ERROR" "The result branch was pushed, but a draft pull request could not be resolved or created."
-  append_report "- Publish Branch: ${publish_branch}"
   exit 1
 fi
 
-append_report "- Publish Repository: ${repository}"
-append_report "- Publish Branch: ${publish_branch}"
-append_report "- Pull Request: ${pr_url}"
+append_report_once "- Pull Request: ${pr_url}"
 finish_status "OK" "Published ${commit_sha} to ${publish_branch} and prepared a draft pull request."
