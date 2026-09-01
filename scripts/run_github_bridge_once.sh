@@ -78,7 +78,10 @@ run_cycle() {
   before_imported="$(mktemp)"
   after_imported="$(mktemp)"
   import_log="${LOG_DIR}/import-${cycle_stamp}-$$.log"
-  trap 'rm -f "${before_imported}" "${after_imported}"' RETURN
+
+  cleanup_cycle_temp() {
+    rm -f "${before_imported}" "${after_imported}"
+  }
 
   echo "AI Council GitHub bridge cycle"
   echo "Generated At: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
@@ -103,11 +106,13 @@ run_cycle() {
       ;;
     AUTH_REQUIRED | ALLOWLIST_REQUIRED)
       echo "GITHUB_BRIDGE_CYCLE_STATUS: ENTRY_BLOCKED"
+      cleanup_cycle_temp
       return 1
       ;;
     *)
       if [[ "${import_rc}" -ne 0 || "${import_status}" == "UNKNOWN" ]]; then
         echo "GITHUB_BRIDGE_CYCLE_STATUS: IMPORT_ERROR"
+        cleanup_cycle_temp
         return 1
       fi
       ;;
@@ -118,6 +123,7 @@ run_cycle() {
     echo "WARNING: one or more QUEUED comments could not be posted" >&2
   fi
   echo "QUEUE_COMMENT_STATUS: ${queue_comment_status}"
+  cleanup_cycle_temp
 
   echo
   bash "${APP_DIR}/scripts/run_job_cycle.sh"
