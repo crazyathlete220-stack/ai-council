@@ -47,16 +47,34 @@ common_env=(
   AI_COUNCIL_WORKSPACE_REGISTRY_DIR="${tmp}/registry"
 )
 
+# No config: block before queue creation.
 env "${common_env[@]}" bash "${ROOT_DIR}/scripts/import_github_jobs.sh" >/dev/null
 test -f "${tmp}/state/blocked/issue-777.blocked"
 test ! -e "${tmp}/create.txt"
 grep -q 'WORKSPACE_NOT_REGISTERED' "${tmp}/comments.txt"
 
-printf 'REPO_NAME=missing-repo\nREPO_PATH=/tmp/missing-repo\nLOG_DIR=/tmp/log\n' > "${tmp}/registry/missing-repo.env"
+# Config exists but points to no directory: report a distinct blocker.
+rm -f "${tmp}/state/blocked/issue-777.blocked"
+: > "${tmp}/comments.txt"
+workspace_path="${tmp}/workspace"
+printf 'REPO_NAME=missing-repo\nREPO_PATH=%s\nLOG_DIR=%s\n' "${workspace_path}" "${tmp}/workspace-log" > "${tmp}/registry/missing-repo.env"
+env "${common_env[@]}" bash "${ROOT_DIR}/scripts/import_github_jobs.sh" >/dev/null
+test -f "${tmp}/state/blocked/issue-777.blocked"
+test ! -e "${tmp}/create.txt"
+grep -q 'WORKSPACE_PATH_MISSING' "${tmp}/comments.txt"
+
+# Once the path is a real Git workspace, the blocker clears and the job queues.
+mkdir -p "${workspace_path}"
+git -C "${workspace_path}" init -q
+: > "${tmp}/comments.txt"
 env "${common_env[@]}" bash "${ROOT_DIR}/scripts/import_github_jobs.sh" >/dev/null
 test ! -e "${tmp}/state/blocked/issue-777.blocked"
 test -f "${tmp}/state/imported/issue-777.imported"
 grep -q '^called$' "${tmp}/create.txt"
+grep -q 'STATE: DISCOVERED' "${tmp}/comments.txt"
 grep -q 'STATE: QUEUED' "${tmp}/comments.txt"
+grep -q '^Job Type: ai_check$' "${tmp}/comments.txt"
+grep -q '^Repo Name: missing-repo$' "${tmp}/comments.txt"
+! grep -q '\\nRepo Name' "${tmp}/comments.txt"
 
 echo "test_import_workspace_block: OK"
