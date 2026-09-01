@@ -46,6 +46,7 @@ DOC_FILES=(
   "vps-codex-direct.md"
   "vps-claude-code.md"
   "durable-job-lifecycle.md"
+  "runtime-audit-profile.md"
 )
 
 SCRIPT_FILES=(
@@ -61,8 +62,11 @@ SCRIPT_FILES=(
   "run_job_once.sh"
   "run_job_cycle.sh"
   "job_status.sh"
+  "extract_job_signals.sh"
   "report_job_result.sh"
   "run_ai_plan.sh"
+  "run_ai_check_core.sh"
+  "run_runtime_audit.sh"
   "run_ai_check.sh"
   "setup_ai_cli_runner.sh"
   "ai_cli_status.sh"
@@ -123,6 +127,10 @@ Durable evidence:
   /var/log/ai-council/jobs/reports/<JOB_ID>.md
   /var/log/ai-council/jobs/summaries/<JOB_ID>.md
   /var/lib/ai-council/github-bridge/{imported,blocked,posted}/
+
+Runtime audit:
+  Create an ai_check Issue with AUDIT_PROFILE=runtime
+  See ${APP_DIR}/docs/runtime-audit-profile.md
 
 Claude Code readiness:
   bash ${APP_DIR}/scripts/claude_code_readiness.sh
