@@ -249,7 +249,12 @@ append_to_reports() {
   tee -a "${log_file}" "${per_job_report}" "${latest_report}" >/dev/null
 }
 
-if run_job > >(tee "${log_file}" "${per_job_report}" "${latest_report}") 2>&1; then
+set +e
+run_job 2>&1 | tee "${log_file}" "${per_job_report}" "${latest_report}"
+status="${PIPESTATUS[0]}"
+set -e
+
+if [[ "${status}" -eq 0 ]]; then
   {
     echo
     echo "JOB_RUNNER_STATUS: OK"
@@ -261,7 +266,6 @@ if run_job > >(tee "${log_file}" "${per_job_report}" "${latest_report}") 2>&1; t
   exit 0
 fi
 
-status=$?
 transient_status="$(awk -F': ' '
   /^AI_EXEC_STATUS: (OUT_OF_HOURS|RATE_LIMITED|HOURLY_LIMIT|DAILY_LIMIT)$/ {value=$2}
   END {print value}
