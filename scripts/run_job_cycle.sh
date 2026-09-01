@@ -14,6 +14,8 @@ REPORT_DIR="${LOG_DIR}/reports"
 PENDING_POST_DIR="${LOG_DIR}/pending-posts"
 LOCK_FILE="${JOB_ROOT}/runner.lock"
 LOCK_WAIT_SECONDS="${AI_COUNCIL_JOB_LOCK_WAIT_SECONDS:-30}"
+STALE_ACTIVE_SECONDS="${AI_COUNCIL_STALE_ACTIVE_SECONDS:-1800}"
+cycle_stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 
 mkdir -p \
   "${QUEUE_DIR}" "${ACTIVE_DIR}" "${DONE_DIR}" "${FAILED_DIR}" "${DEFERRED_DIR}" \
@@ -82,6 +84,80 @@ post_pending_reports() {
   return 0
 }
 
+recover_stale_active_jobs() {
+  local active_jobs=()
+  local active_job=""
+  local job_base=""
+  local job_id=""
+  local job_type=""
+  local repo_name=""
+  local request_source=""
+  local requested_by=""
+  local created_at=""
+  local modified_epoch=""
+  local now_epoch=""
+  local age_seconds=""
+  local report_file=""
+  local recent_active=0
+
+  now_epoch="$(date -u +%s)"
+  shopt -s nullglob
+  active_jobs=("${ACTIVE_DIR}"/*.job)
+  shopt -u nullglob
+
+  for active_job in "${active_jobs[@]}"; do
+    modified_epoch="$(stat -c '%Y' "${active_job}" 2>/dev/null || echo "${now_epoch}")"
+    age_seconds="$(( now_epoch - modified_epoch ))"
+
+    if [[ "${age_seconds}" -lt "${STALE_ACTIVE_SECONDS}" ]]; then
+      echo "Active job is younger than stale threshold; leaving it untouched: ${active_job}"
+      recent_active=1
+      continue
+    fi
+
+    job_base="$(basename "${active_job}")"
+    job_id="$(awk -F= '$1 == "JOB_ID" {print $2; exit}' "${active_job}" 2>/dev/null || true)"
+    job_type="$(awk -F= '$1 == "JOB_TYPE" {print $2; exit}' "${active_job}" 2>/dev/null || true)"
+    repo_name="$(awk -F= '$1 == "REPO_NAME" {print $2; exit}' "${active_job}" 2>/dev/null || true)"
+    request_source="$(awk -F= '$1 == "REQUEST_SOURCE" {print $2; exit}' "${active_job}" 2>/dev/null || true)"
+    requested_by="$(awk -F= '$1 == "REQUESTED_BY" {print $2; exit}' "${active_job}" 2>/dev/null || true)"
+    created_at="$(awk -F= '$1 == "CREATED_AT" {print $2; exit}' "${active_job}" 2>/dev/null || true)"
+    job_id="${job_id:-${job_base%.job}}"
+    report_file="${REPORT_DIR}/${job_id}-stale-${cycle_stamp}.md"
+
+    mv "${active_job}" "${FAILED_DIR}/${job_base}"
+    {
+      echo "# AI Council Job Run"
+      echo
+      echo "- Generated At: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+      echo "- Hostname: $(hostname)"
+      echo "- Job ID: ${job_id}"
+      echo "- Job Type: ${job_type}"
+      echo "- Repo Name: ${repo_name}"
+      echo "- Request Source: ${request_source}"
+      echo "- Requested By: ${requested_by}"
+      echo "- Created At: ${created_at}"
+      echo "- Status Reason: stale active job was recovered after ${age_seconds}s; automatic re-execution was refused to avoid duplicate side effects"
+      echo "- Retry State: use requeue_github_issue.sh after reviewing the prior job log"
+      echo
+      echo "JOB_RUNNER_STATUS: ERROR"
+    } >"${report_file}"
+    cp "${report_file}" "${LATEST_REPORT}"
+
+    if [[ "${request_source}" =~ ^github_issue_[0-9]+$ ]]; then
+      cp "${report_file}" "${PENDING_POST_DIR}/$(basename "${report_file}")"
+    fi
+
+    echo "Recovered stale active job to failed: ${job_base}"
+  done
+
+  if [[ "${recent_active}" -eq 1 ]]; then
+    return 2
+  fi
+
+  return 0
+}
+
 promote_deferred_jobs() {
   local now_epoch=""
   local retry_files=()
@@ -124,6 +200,19 @@ if ! post_pending_reports; then
   exit 1
 fi
 
+recover_stale_active_jobs
+active_recovery_rc=$?
+
+if ! post_pending_reports; then
+  echo "JOB_CYCLE_STATUS: POST_BLOCKED"
+  exit 1
+fi
+
+if [[ "${active_recovery_rc}" -eq 2 ]]; then
+  echo "JOB_CYCLE_STATUS: ACTIVE_PRESENT"
+  exit 0
+fi
+
 promote_deferred_jobs
 
 queued_jobs=()
@@ -148,7 +237,6 @@ expected_requested_by="$(awk -F= '$1 == "REQUESTED_BY" {print $2; exit}' "${job_
 expected_created_at="$(awk -F= '$1 == "CREATED_AT" {print $2; exit}' "${job_file}" 2>/dev/null || true)"
 expected_job_id="${expected_job_id:-${job_base%.job}}"
 
-cycle_stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 cycle_log="${LOG_DIR}/job-cycle-${cycle_stamp}-$$.log"
 
 bash "${APP_DIR}/scripts/run_job_once.sh" >"${cycle_log}" 2>&1
