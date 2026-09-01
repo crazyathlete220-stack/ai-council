@@ -35,7 +35,7 @@ fi
 extract_status() {
   local file="$1"
   local key="$2"
-  awk -F': ' -v key="${key}:" '$1 == key {print $2}' "${file}" 2>/dev/null | tail -n 1 | tr -d '[:space:]'
+  awk -F': ' -v key="${key}" '$1 == key {print $2}' "${file}" 2>/dev/null | tail -n 1 | tr -d '[:space:]'
 }
 
 post_report() {
