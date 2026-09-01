@@ -1,0 +1,41 @@
+name: Auto-label VPS job issues
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  label-vps-job:
+    if: >-
+      github.event.issue.user.login == github.repository_owner &&
+      contains(github.event.issue.body, 'JOB_TYPE=') &&
+      contains(github.event.issue.body, 'REPO_NAME=')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure and apply dispatch label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh label create "vps-job" \
+            --repo "$REPOSITORY" \
+            --color "0E8A16" \
+            --description "Dispatch to the VPS AI job bridge" \
+            --force
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPOSITORY" --add-label "vps-job"
+
+      - name: Record dispatch readiness
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          existing="$(gh issue view "$ISSUE_NUMBER" --repo "$REPOSITORY" --json comments --jq '[.comments[].body | select(contains("DISPATCH_READY"))] | length')"
+          if [ "$existing" = "0" ]; then
+            gh issue comment "$ISSUE_NUMBER" --repo "$REPOSITORY" --body $'DISPATCH_READY: `vps-job` label applied by GitHub Actions.\n\nThis confirms only that the Issue is eligible for the VPS bridge. It does not confirm bridge pickup or execution.'
+          fi
