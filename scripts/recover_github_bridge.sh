@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -u
+set -uo pipefail
 
 APP_DIR="${AI_COUNCIL_APP_DIR:-/opt/ai-council}"
 WORKSPACE_ROOT="${AI_COUNCIL_WORKSPACE_ROOT:-/opt/ai-workspaces}"
@@ -76,6 +76,24 @@ copy_file() {
   fi
 }
 
+check_free_space() {
+  local path="$1"
+  local available_kb=""
+
+  available_kb="$(df -Pk "${path}" 2>/dev/null | awk 'NR == 2 {print $4}')"
+  if [[ ! "${available_kb}" =~ ^[0-9]+$ ]]; then
+    mark_warning "could not determine free space for ${path}"
+    return
+  fi
+
+  echo "- free space ${path}: ${available_kb} KB"
+  if [[ "${available_kb}" -lt 131072 ]]; then
+    mark_error "less than 128 MB free under ${path}"
+  elif [[ "${available_kb}" -lt 524288 ]]; then
+    mark_warning "less than 512 MB free under ${path}"
+  fi
+}
+
 echo "# AI Council GitHub Bridge Recovery"
 echo
 echo "- Generated At: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
@@ -84,13 +102,33 @@ echo "- Runtime App: ${APP_DIR}"
 echo "- Optional Workspace: ${workspace_name:-not requested}"
 echo
 
+echo "## Host prerequisites"
+for command_name in bash git gh jq flock realpath systemctl; do
+  if command -v "${command_name}" >/dev/null 2>&1; then
+    echo "- ${command_name}: present"
+  else
+    mark_error "required command is missing: ${command_name}"
+  fi
+done
+
+if command -v bwrap >/dev/null 2>&1; then
+  echo "- bubblewrap: present"
+else
+  mark_error "bubblewrap is missing; ai_exec Linux sandbox cannot be considered ready"
+fi
+
+check_free_space /opt
+check_free_space /var/lib
+check_free_space /var/log
+
+echo
 echo "## Install current runtime files"
 install -d -m 0755 "${APP_DIR}" "${APP_DIR}/scripts" "${APP_DIR}/systemd"
 
 for source_path in "${REPO_DIR}"/scripts/*.sh; do
   [[ -f "${source_path}" ]] || continue
   copy_file "${source_path}" "${APP_DIR}/scripts/$(basename "${source_path}")" 0755
- done
+done
 
 for unit_name in "${BRIDGE_SERVICE}" "${BRIDGE_TIMER}" "${RUNNER_SERVICE}" "${RUNNER_TIMER}"; do
   source_path="${REPO_DIR}/systemd/${unit_name}"
@@ -100,10 +138,21 @@ for unit_name in "${BRIDGE_SERVICE}" "${BRIDGE_TIMER}" "${RUNNER_SERVICE}" "${RU
   fi
   copy_file "${source_path}" "${APP_DIR}/systemd/${unit_name}" 0644
   copy_file "${source_path}" "/etc/systemd/system/${unit_name}" 0644
- done
+done
 
 if ! bash -n "${APP_DIR}"/scripts/*.sh; then
   mark_error "runtime shell syntax validation failed"
+else
+  echo "- runtime shell syntax: OK"
+fi
+
+echo
+echo "## Identity and GitHub entry"
+if ! id -u "${OPERATOR_USER}" >/dev/null 2>&1; then
+  echo "- operator user missing; creating through setup_operator_user.sh"
+  if ! bash "${APP_DIR}/scripts/setup_operator_user.sh"; then
+    mark_error "operator user setup failed: ${OPERATOR_USER}"
+  fi
 fi
 
 if ! command -v gh >/dev/null 2>&1; then
@@ -111,7 +160,7 @@ if ! command -v gh >/dev/null 2>&1; then
 elif ! gh auth status --hostname github.com >/dev/null 2>&1; then
   mark_error "gh authentication is not valid for root"
 else
-  echo "- gh authentication: OK"
+  echo "- root gh authentication: OK"
 fi
 
 if [[ ! -r "${ALLOWLIST_FILE}" ]]; then
@@ -119,26 +168,31 @@ if [[ ! -r "${ALLOWLIST_FILE}" ]]; then
 elif ! grep -Eq '^[[:space:]]*[A-Za-z0-9-]+[[:space:]]*(#.*)?$' "${ALLOWLIST_FILE}"; then
   mark_error "GitHub bridge allowlist has no valid username"
 else
-  echo "- allowlist: readable"
+  echo "- allowlist: readable and non-empty"
 fi
 
 install -d -m 0755 \
   /var/lib/ai-council/github-bridge/imported \
   /var/lib/ai-council/github-bridge/rejected \
   /var/lib/ai-council/github-bridge/posted \
+  /var/lib/ai-council/github-bridge/requeue-archive \
   /var/lib/ai-council/jobs/queue \
   /var/lib/ai-council/jobs/active \
   /var/lib/ai-council/jobs/done \
   /var/lib/ai-council/jobs/failed \
+  /var/lib/ai-council/jobs/deferred \
   /var/log/ai-council/github-bridge \
-  /var/log/ai-council/jobs
+  /var/log/ai-council/jobs/reports \
+  /var/log/ai-council/jobs/pending-posts
 
-if ! id -u "${OPERATOR_USER}" >/dev/null 2>&1; then
-  mark_error "operator user is missing: ${OPERATOR_USER}"
-else
+if id -u "${OPERATOR_USER}" >/dev/null 2>&1; then
   chown -R "${OPERATOR_USER}:${OPERATOR_USER}" /var/lib/ai-council/jobs /var/log/ai-council/jobs
+else
+  mark_error "operator user is still unavailable: ${OPERATOR_USER}"
 fi
 
+echo
+echo "## Workspace"
 if [[ -n "${workspace_name}" ]]; then
   workspace_path="${WORKSPACE_ROOT}/${workspace_name}"
   config_file="${REGISTRY_DIR}/${workspace_name}.env"
@@ -149,9 +203,9 @@ if [[ -n "${workspace_name}" ]]; then
     if [[ -z "${workspace_repo}" ]]; then
       mark_error "workspace is missing and no OWNER/REPOSITORY source was supplied: ${workspace_path}"
     elif ! command -v gh >/dev/null 2>&1 || ! gh auth status --hostname github.com >/dev/null 2>&1; then
-      mark_error "workspace is missing and authenticated gh is unavailable"
+      mark_error "workspace is missing and authenticated root gh is unavailable"
     elif ! gh repo view "${workspace_repo}" >/dev/null 2>&1; then
-      mark_error "repository is not accessible through the existing gh authentication: ${workspace_repo}"
+      mark_error "repository is not accessible through existing root gh authentication: ${workspace_repo}"
     else
       echo "- cloning workspace: ${workspace_repo} -> ${workspace_path}"
       if ! gh repo clone "${workspace_repo}" "${workspace_path}"; then
@@ -175,8 +229,13 @@ if [[ -n "${workspace_name}" ]]; then
       if [[ ! -r "${config_file}" ]]; then
         mark_error "workspace config is still unreadable: ${config_file}"
       fi
+      if ! bash "${APP_DIR}/scripts/ai_cli_status.sh" "${workspace_name}"; then
+        mark_error "Codex CLI or workspace readiness check failed: ${workspace_name}"
+      fi
     fi
   fi
+else
+  echo "- no workspace registration requested"
 fi
 
 echo
@@ -208,25 +267,44 @@ fi
 
 echo
 echo "## Run one bridge cycle"
-set +e
 systemctl start "${BRIDGE_SERVICE}"
 bridge_run_rc=$?
-set -e
 
 if [[ "${bridge_run_rc}" -ne 0 ]]; then
-  mark_warning "bridge service returned non-zero after the recovery run; inspect: journalctl -u ${BRIDGE_SERVICE} -n 100 --no-pager"
+  mark_error "bridge service returned non-zero; inspect its journal and latest cycle log"
+fi
+
+latest_cycle="/var/log/ai-council/github-bridge/latest-cycle.log"
+if [[ ! -r "${latest_cycle}" ]]; then
+  mark_error "latest bridge cycle log is missing: ${latest_cycle}"
+elif ! grep -Fq "GITHUB_BRIDGE_CYCLE_STATUS: OK" "${latest_cycle}"; then
+  mark_error "latest bridge cycle did not report OK"
+else
+  echo "- latest bridge cycle status: OK"
+fi
+
+pending_count="$(find /var/log/ai-council/jobs/pending-posts -maxdepth 1 -type f -name '*.md' 2>/dev/null | wc -l | tr -d '[:space:]')"
+echo "- pending GitHub result reports: ${pending_count}"
+if [[ "${pending_count}" -gt 0 ]]; then
+  mark_error "one or more GitHub result reports remain undelivered"
 fi
 
 bridge_service_state="$(systemctl is-failed "${BRIDGE_SERVICE}" 2>/dev/null || true)"
 runner_service_state="$(systemctl is-failed "${RUNNER_SERVICE}" 2>/dev/null || true)"
-
 echo "- bridge service failed state: ${bridge_service_state:-unknown}"
 echo "- runner service failed state: ${runner_service_state:-unknown}"
-echo "- latest bridge cycle: /var/log/ai-council/github-bridge/latest-cycle.log"
-echo "- latest job report: /var/log/ai-council/jobs/latest-job-report.md"
-echo "- rejected issues: /var/log/ai-council/github-bridge/rejected-issues.log"
-echo
 
+echo
+echo "## Evidence locations"
+echo "- latest bridge cycle: ${latest_cycle}"
+echo "- latest job report: /var/log/ai-council/jobs/latest-job-report.md"
+echo "- job reports: /var/log/ai-council/jobs/reports/"
+echo "- pending posts: /var/log/ai-council/jobs/pending-posts/"
+echo "- rejected issues: /var/log/ai-council/github-bridge/rejected-issues.log"
+echo "- bridge journal: journalctl -u ${BRIDGE_SERVICE} -n 200 --no-pager"
+echo "- runner journal: journalctl -u ${RUNNER_SERVICE} -n 200 --no-pager"
+
+echo
 echo "## Result"
 echo "- Errors: ${errors}"
 echo "- Warnings: ${warnings}"
