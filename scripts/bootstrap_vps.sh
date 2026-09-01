@@ -20,7 +20,7 @@ REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 echo "Installing minimum packages..."
 apt-get update
-apt-get install -y git curl jq ca-certificates
+apt-get install -y git curl jq ca-certificates util-linux
 
 echo "Creating application and log directories..."
 install -d -m 0755 "${APP_DIR}"
@@ -45,6 +45,7 @@ DOC_FILES=(
   "vps-ai-cli-runner.md"
   "vps-codex-direct.md"
   "vps-claude-code.md"
+  "durable-job-lifecycle.md"
 )
 
 SCRIPT_FILES=(
@@ -58,6 +59,7 @@ SCRIPT_FILES=(
   "setup_operator_user.sh"
   "create_job.sh"
   "run_job_once.sh"
+  "run_job_cycle.sh"
   "job_status.sh"
   "report_job_result.sh"
   "run_ai_plan.sh"
@@ -69,6 +71,8 @@ SCRIPT_FILES=(
   "claude_code_readiness.sh"
   "import_github_jobs.sh"
   "post_job_result_to_github.sh"
+  "requeue_github_issue.sh"
+  "deploy_runtime.sh"
 )
 
 SYSTEMD_FILES=(
@@ -83,51 +87,43 @@ SYSTEMD_FILES=(
 for doc_file in "${DOC_FILES[@]}"; do
   install -m 0644 "${REPO_DIR}/docs/${doc_file}" "${APP_DIR}/docs/${doc_file}"
 done
-
 for script_file in "${SCRIPT_FILES[@]}"; do
   install -m 0755 "${REPO_DIR}/scripts/${script_file}" "${APP_DIR}/scripts/${script_file}"
 done
-
 for systemd_file in "${SYSTEMD_FILES[@]}"; do
   install -m 0644 "${REPO_DIR}/systemd/${systemd_file}" "/etc/systemd/system/${systemd_file}"
 done
 
-echo "Reloading systemd and enabling timer..."
 systemctl daemon-reload
 systemctl enable --now "${TIMER_NAME}"
 
-cat <<EOF
+cat <<EOF_REPORT
 Setup finished.
 
-Next confirmation commands:
+Initial confirmation:
   sudo systemctl status ${TIMER_NAME}
-  sudo systemctl list-timers ${TIMER_NAME}
   sudo systemctl start ${SERVICE_NAME}
   sudo cat ${LOG_DIR}/latest-report.md
-  sudo journalctl -u ${SERVICE_NAME} -n 100 --no-pager
 
-Phase 3 operator commands, after review:
+Workspace and operator setup:
   sudo bash ${APP_DIR}/scripts/setup_operator_user.sh
-  bash ${APP_DIR}/scripts/job_status.sh
-  bash ${APP_DIR}/scripts/create_job.sh repo_check <REPO_NAME>
-  bash ${APP_DIR}/scripts/create_job.sh ai_plan ai-council
-  bash ${APP_DIR}/scripts/create_job.sh ai_check ai-council
+  sudo bash ${APP_DIR}/scripts/setup_workspaces.sh
+  sudo bash ${APP_DIR}/scripts/register_workspace.sh <REPO_NAME> /opt/ai-workspaces/<REPO_NAME>
+  bash ${APP_DIR}/scripts/workspace_status.sh
   sudo bash ${APP_DIR}/scripts/setup_ai_cli_runner.sh ai-council
   bash ${APP_DIR}/scripts/ai_cli_status.sh ai-council
-  bash ${APP_DIR}/scripts/create_job.sh ai_exec ai-council
-  sudo bash ${APP_DIR}/scripts/run_job_once.sh
-  sudo bash ${APP_DIR}/scripts/report_job_result.sh
-  sudo systemctl enable --now ${JOB_TIMER_NAME}
 
-GitHub bridge commands, after gh authentication is configured on the VPS:
+GitHub bridge setup, after gh authentication and allowlist configuration:
   sudo install -d -m 0755 /etc/ai-council
   printf '%s\n' '<GITHUB_USERNAME>' | sudo tee /etc/ai-council/github-bridge-allowlist >/dev/null
   sudo chmod 0644 /etc/ai-council/github-bridge-allowlist
-  bash ${APP_DIR}/scripts/github_bridge_timer.sh status
-  sudo bash ${APP_DIR}/scripts/import_github_jobs.sh
-  sudo bash ${APP_DIR}/scripts/post_job_result_to_github.sh
-  sudo bash ${APP_DIR}/scripts/github_bridge_timer.sh enable
+  sudo bash ${APP_DIR}/scripts/deploy_runtime.sh
 
-Claude Code readiness, before any manual install decision:
+Durable evidence:
+  /var/log/ai-council/jobs/reports/<JOB_ID>.md
+  /var/log/ai-council/jobs/summaries/<JOB_ID>.md
+  /var/lib/ai-council/github-bridge/{imported,blocked,posted}/
+
+Claude Code readiness:
   bash ${APP_DIR}/scripts/claude_code_readiness.sh
-EOF
+EOF_REPORT
