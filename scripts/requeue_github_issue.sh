@@ -20,6 +20,17 @@ if [[ ! "${issue_number}" =~ ^[0-9]+$ ]]; then
   exit 1
 fi
 
+install -d -m 0755 \
+  "${STATE_ROOT}/imported" \
+  "${STATE_ROOT}/posted" \
+  "${STATE_ROOT}/requeue-archive" \
+  "${JOB_ROOT}/queue" \
+  "${JOB_ROOT}/active" \
+  "${JOB_ROOT}/done" \
+  "${JOB_ROOT}/failed" \
+  "${JOB_ROOT}/deferred" \
+  "${LOG_DIR}/pending-posts"
+
 imported_marker="${STATE_ROOT}/imported/issue-${issue_number}.imported"
 archive_dir="${STATE_ROOT}/requeue-archive/issue-${issue_number}/$(date -u +'%Y%m%dT%H%M%SZ')"
 
