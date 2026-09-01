@@ -9,6 +9,7 @@ OPERATOR_USER="${AI_COUNCIL_OPERATOR_USER:-ai-council}"
 AI_CLI_STATE_ROOT="${AI_COUNCIL_AI_CLI_STATE_ROOT:-/var/lib/ai-council/ai-cli}"
 AI_CLI_LOG_ROOT="${AI_COUNCIL_AI_CLI_LOG_ROOT:-/var/log/ai-council/ai-cli}"
 REGISTRY_DIR="${AI_COUNCIL_WORKSPACE_REGISTRY_DIR:-/etc/ai-council/workspaces.d}"
+WORKSPACE_ROOT="${AI_COUNCIL_WORKSPACE_ROOT:-/opt/ai-workspaces}"
 repo_name="${1:-}"
 
 if [[ "${repo_name}" == "--help" || "${repo_name}" == "-h" ]]; then
@@ -46,17 +47,44 @@ if [[ -n "${repo_name}" ]]; then
     exit 1
   fi
 
+  config_owner="$(stat -c '%U' "${config_file}" 2>/dev/null || true)"
+  config_mode="$(stat -c '%a' "${config_file}" 2>/dev/null || true)"
+  if [[ "${config_owner}" != "root" || ! "${config_mode}" =~ ^[0-7]{3,4}$ ]]; then
+    echo "ERROR: Workspace config must be root-owned with a valid mode: ${config_file}" >&2
+    exit 1
+  fi
+  config_mode_decimal=$((8#${config_mode}))
+  if (( (config_mode_decimal & 0022) != 0 )); then
+    echo "ERROR: Workspace config is group/world writable: ${config_file}" >&2
+    exit 1
+  fi
+
+  REPO_NAME=""
+  REPO_PATH=""
   # shellcheck disable=SC1090
   source "${config_file}"
   repo_path="${REPO_PATH:-}"
 
-  if [[ -z "${repo_path}" || ! -d "${repo_path}" ]]; then
-    echo "ERROR: Registered repo path does not exist: ${repo_path:-not set}" >&2
+  if [[ "${REPO_NAME:-}" != "${repo_name}" ]]; then
+    echo "ERROR: Workspace config name mismatch: ${REPO_NAME:-not set}" >&2
     exit 1
   fi
 
-  echo "Making workspace writable by ${OPERATOR_USER}: ${repo_path}"
-  chown -R "${OPERATOR_USER}:${OPERATOR_USER}" "${repo_path}"
+  if [[ -z "${repo_path}" || ! -d "${repo_path}/.git" ]]; then
+    echo "ERROR: Registered repo path is not a Git checkout: ${repo_path:-not set}" >&2
+    exit 1
+  fi
+
+  workspace_root_real="$(realpath -e "${WORKSPACE_ROOT}")"
+  repo_path_real="$(realpath -e "${repo_path}")"
+  if [[ "${repo_path_real}" != "${workspace_root_real}/"* ]]; then
+    echo "ERROR: Refusing recursive ownership change outside ${workspace_root_real}: ${repo_path_real}" >&2
+    exit 1
+  fi
+
+  echo "Making workspace writable by ${OPERATOR_USER}: ${repo_path_real}"
+  chown -hR "${OPERATOR_USER}:${OPERATOR_USER}" -- "${repo_path_real}"
+  repo_path="${repo_path_real}"
 fi
 
 cat <<EOF
