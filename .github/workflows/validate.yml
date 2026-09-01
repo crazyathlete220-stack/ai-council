@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check shell syntax
         run: bash -n scripts/*.sh tests/*.sh
@@ -30,6 +30,7 @@ jobs:
           test -f docs/vps-codex-direct.md
           test -f docs/vps-claude-code.md
           test -f docs/durable-job-lifecycle.md
+          test -f docs/runtime-audit-profile.md
           test -f scripts/setup_workspaces.sh
           test -f scripts/register_workspace.sh
           test -f scripts/workspace_status.sh
@@ -40,8 +41,11 @@ jobs:
           test -f scripts/run_job_once.sh
           test -f scripts/run_job_cycle.sh
           test -f scripts/job_status.sh
+          test -f scripts/extract_job_signals.sh
           test -f scripts/report_job_result.sh
           test -f scripts/run_ai_plan.sh
+          test -f scripts/run_ai_check_core.sh
+          test -f scripts/run_runtime_audit.sh
           test -f scripts/run_ai_check.sh
           test -f scripts/setup_ai_cli_runner.sh
           test -f scripts/ai_cli_status.sh
@@ -70,6 +74,8 @@ jobs:
           test -f tests/test_job_lifecycle.sh
           test -f tests/test_result_posting.sh
           test -f tests/test_import_workspace_block.sh
+          test -f tests/test_runtime_audit.sh
+          test -f tests/test_ai_check_audit_wrapper.sh
 
-      - name: Run lifecycle tests
+      - name: Run lifecycle and audit tests
         run: bash tests/run.sh

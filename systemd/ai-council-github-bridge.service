@@ -5,7 +5,12 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
+User=root
+Group=root
 WorkingDirectory=/opt/ai-council
+EnvironmentFile=/etc/ai-council/runtime.env
 Environment=HOME=/root
 Environment=XDG_CONFIG_HOME=/root/.config
+UMask=0027
+TimeoutStartSec=5min
 ExecStart=/opt/ai-council/scripts/import_github_jobs.sh

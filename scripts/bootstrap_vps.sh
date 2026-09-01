@@ -3,6 +3,7 @@ set -euo pipefail
 
 APP_DIR="/opt/ai-council"
 LOG_DIR="/var/log/ai-council"
+RUNTIME_CONFIG="/etc/ai-council/runtime.env"
 SERVICE_NAME="ai-council-healthcheck.service"
 TIMER_NAME="ai-council-healthcheck.timer"
 JOB_SERVICE_NAME="ai-council-job-runner.service"
@@ -22,14 +23,12 @@ echo "Installing minimum packages..."
 apt-get update
 apt-get install -y git curl jq ca-certificates util-linux
 
-echo "Creating application and log directories..."
-install -d -m 0755 "${APP_DIR}"
-install -d -m 0755 "${APP_DIR}/docs"
-install -d -m 0755 "${APP_DIR}/scripts"
-install -d -m 0755 "${APP_DIR}/systemd"
+echo "Creating application, config, and log directories..."
+install -d -m 0755 "${APP_DIR}" "${APP_DIR}/docs" "${APP_DIR}/scripts" "${APP_DIR}/systemd" "${APP_DIR}/config"
+install -d -m 0755 /etc/ai-council
 install -d -m 0755 "${LOG_DIR}"
 
-echo "Copying scripts and systemd units..."
+echo "Copying scripts, docs, config template, and systemd units..."
 install -m 0644 "${REPO_DIR}/README.md" "${APP_DIR}/README.md"
 
 DOC_FILES=(
@@ -46,6 +45,7 @@ DOC_FILES=(
   "vps-codex-direct.md"
   "vps-claude-code.md"
   "durable-job-lifecycle.md"
+  "runtime-audit-profile.md"
 )
 
 SCRIPT_FILES=(
@@ -61,8 +61,11 @@ SCRIPT_FILES=(
   "run_job_once.sh"
   "run_job_cycle.sh"
   "job_status.sh"
+  "extract_job_signals.sh"
   "report_job_result.sh"
   "run_ai_plan.sh"
+  "run_ai_check_core.sh"
+  "run_runtime_audit.sh"
   "run_ai_check.sh"
   "setup_ai_cli_runner.sh"
   "ai_cli_status.sh"
@@ -90,9 +93,16 @@ done
 for script_file in "${SCRIPT_FILES[@]}"; do
   install -m 0755 "${REPO_DIR}/scripts/${script_file}" "${APP_DIR}/scripts/${script_file}"
 done
+install -m 0644 "${REPO_DIR}/config/runtime.env.example" "${APP_DIR}/config/runtime.env.example"
+if [[ ! -e "${RUNTIME_CONFIG}" ]]; then
+  install -m 0644 "${REPO_DIR}/config/runtime.env.example" "${RUNTIME_CONFIG}"
+fi
 for systemd_file in "${SYSTEMD_FILES[@]}"; do
+  install -m 0644 "${REPO_DIR}/systemd/${systemd_file}" "${APP_DIR}/systemd/${systemd_file}"
   install -m 0644 "${REPO_DIR}/systemd/${systemd_file}" "/etc/systemd/system/${systemd_file}"
 done
+
+bash "${APP_DIR}/scripts/deploy_runtime.sh" --check
 
 systemctl daemon-reload
 systemctl enable --now "${TIMER_NAME}"
@@ -105,6 +115,11 @@ Initial confirmation:
   sudo systemctl start ${SERVICE_NAME}
   sudo cat ${LOG_DIR}/latest-report.md
 
+Runtime source of truth:
+  ${RUNTIME_CONFIG}
+  This file must contain only non-secret paths, repository, and label settings.
+  Tokens, passwords, cookies, private keys, and other secrets are prohibited.
+
 Workspace and operator setup:
   sudo bash ${APP_DIR}/scripts/setup_operator_user.sh
   sudo bash ${APP_DIR}/scripts/setup_workspaces.sh
@@ -114,7 +129,6 @@ Workspace and operator setup:
   bash ${APP_DIR}/scripts/ai_cli_status.sh ai-council
 
 GitHub bridge setup, after gh authentication and allowlist configuration:
-  sudo install -d -m 0755 /etc/ai-council
   printf '%s\n' '<GITHUB_USERNAME>' | sudo tee /etc/ai-council/github-bridge-allowlist >/dev/null
   sudo chmod 0644 /etc/ai-council/github-bridge-allowlist
   sudo bash ${APP_DIR}/scripts/deploy_runtime.sh
@@ -123,6 +137,10 @@ Durable evidence:
   /var/log/ai-council/jobs/reports/<JOB_ID>.md
   /var/log/ai-council/jobs/summaries/<JOB_ID>.md
   /var/lib/ai-council/github-bridge/{imported,blocked,posted}/
+
+Runtime audit:
+  Create an ai_check Issue with AUDIT_PROFILE=runtime
+  See ${APP_DIR}/docs/runtime-audit-profile.md
 
 Claude Code readiness:
   bash ${APP_DIR}/scripts/claude_code_readiness.sh
