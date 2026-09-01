@@ -14,6 +14,9 @@ jobs:
       - name: Check shell syntax
         run: bash -n scripts/*.sh
 
+      - name: Test bridge recovery paths
+        run: bash scripts/test_bridge_recovery.sh
+
       - name: Check required files
         run: |
           test -f README.md
@@ -37,6 +40,10 @@ jobs:
           test -f scripts/setup_operator_user.sh
           test -f scripts/create_job.sh
           test -f scripts/run_job_once.sh
+          test -f scripts/run_job_cycle.sh
+          test -f scripts/run_github_bridge_once.sh
+          test -f scripts/recover_github_bridge.sh
+          test -f scripts/test_bridge_recovery.sh
           test -f scripts/job_status.sh
           test -f scripts/report_job_result.sh
           test -f scripts/run_ai_plan.sh
