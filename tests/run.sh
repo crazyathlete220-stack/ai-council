@@ -5,4 +5,6 @@ bash -n "${ROOT_DIR}"/scripts/*.sh "${ROOT_DIR}"/tests/*.sh
 bash "${ROOT_DIR}/tests/test_job_lifecycle.sh"
 bash "${ROOT_DIR}/tests/test_result_posting.sh"
 bash "${ROOT_DIR}/tests/test_import_workspace_block.sh"
+bash "${ROOT_DIR}/tests/test_runtime_audit.sh"
+bash "${ROOT_DIR}/tests/test_ai_check_audit_wrapper.sh"
 echo "tests: OK"
