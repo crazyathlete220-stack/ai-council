@@ -16,12 +16,18 @@ jobs:
       contains(github.event.issue.body, 'REPO_NAME=')
     runs-on: ubuntu-latest
     steps:
-      - name: Apply dispatch label
+      - name: Ensure and apply dispatch label
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPOSITORY: ${{ github.repository }}
-        run: gh issue edit "$ISSUE_NUMBER" --repo "$REPOSITORY" --add-label "vps-job"
+        run: |
+          gh label create "vps-job" \
+            --repo "$REPOSITORY" \
+            --color "0E8A16" \
+            --description "Dispatch to the VPS AI job bridge" \
+            --force
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPOSITORY" --add-label "vps-job"
 
       - name: Record dispatch readiness
         env:
