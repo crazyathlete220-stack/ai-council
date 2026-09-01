@@ -3,7 +3,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_ROOT="$(mktemp -d)"
-trap 'rm -rf "${TEST_ROOT}"' EXIT
+trap 'sudo rm -rf "${TEST_ROOT}"' EXIT
 
 pass_count=0
 
