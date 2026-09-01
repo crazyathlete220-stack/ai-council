@@ -19,7 +19,7 @@ jobs:
           bash scripts/test_bridge_recovery.sh
           bash scripts/test_stale_active_recovery.sh
           bash scripts/test_recovery_regressions.sh
-          bash scripts/test_importer_preflight.sh
+          sudo bash scripts/test_importer_preflight.sh
 
       - name: Check required files
         run: |
