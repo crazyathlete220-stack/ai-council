@@ -15,7 +15,9 @@ jobs:
         run: bash -n scripts/*.sh
 
       - name: Test bridge recovery paths
-        run: bash scripts/test_bridge_recovery.sh
+        run: |
+          bash scripts/test_bridge_recovery.sh
+          bash scripts/test_stale_active_recovery.sh
 
       - name: Check required files
         run: |
@@ -43,7 +45,9 @@ jobs:
           test -f scripts/run_job_cycle.sh
           test -f scripts/run_github_bridge_once.sh
           test -f scripts/recover_github_bridge.sh
+          test -f scripts/requeue_github_issue.sh
           test -f scripts/test_bridge_recovery.sh
+          test -f scripts/test_stale_active_recovery.sh
           test -f scripts/job_status.sh
           test -f scripts/report_job_result.sh
           test -f scripts/run_ai_plan.sh
