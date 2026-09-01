@@ -72,4 +72,4 @@ jobs:
           test -f tests/test_import_workspace_block.sh
 
       - name: Run lifecycle tests
-        run: tests/run.sh
+        run: bash tests/run.sh
