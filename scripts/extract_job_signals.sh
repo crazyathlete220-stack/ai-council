@@ -9,6 +9,25 @@ if [[ -z "${REPORT_FILE}" || ! -r "${REPORT_FILE}" ]]; then
 fi
 
 awk '
+  function clear_temp(   key, i) {
+    for (key in audit_temp) delete audit_temp[key]
+    for (key in audit_temp_seen) delete audit_temp_seen[key]
+    for (i=1; i<=audit_temp_n; i++) delete audit_temp_order[i]
+    audit_temp_n=0
+  }
+
+  function commit_audit_block(   key, i) {
+    for (key in audit_final) delete audit_final[key]
+    for (i=1; i<=audit_final_n; i++) delete audit_final_order[i]
+    audit_final_n=audit_temp_n
+    for (i=1; i<=audit_temp_n; i++) {
+      key=audit_temp_order[i]
+      audit_final_order[i]=key
+      audit_final[key]=audit_temp[key]
+    }
+    audit_complete=1
+  }
+
   BEGIN {
     na=split("Generated At|Hostname|Job ID|Job Type|Repo Name|Repo Path|Request Source|Requested By|Job Log|Job Report|Plan File|Latest Plan|Check File|Latest Check|Exec File|Latest Exec|CLI Provider|Result Marker|Status Reason|Guard Status|Commit Status|Commit|Changed File Count|Changed File Bytes|Failed Change Stash|Allowed Hours JST|Current Hour JST|Max Per Hour|Hourly Count Before Run|Max Per Day|Daily Count Before Run|Deferred Reason|Retry Not Before Epoch|Defer Count|Max Defer Count", a, "|")
     for (i=1; i<=na; i++) allowed_meta[a[i]]=1
@@ -20,14 +39,19 @@ awk '
     for (i=1; i<=nc; i++) allowed_audit[c[i]]=1
 
     in_audit=0
+    audit_complete=0
+    audit_temp_n=0
+    audit_final_n=0
   }
 
   /^RUNTIME_AUDIT_OUTPUT_BEGIN$/ {
+    clear_temp()
     in_audit=1
     next
   }
 
   /^RUNTIME_AUDIT_OUTPUT_END$/ {
+    if (in_audit) commit_audit_block()
     in_audit=0
     next
   }
@@ -36,8 +60,9 @@ awk '
     if ($0 ~ /^[A-Z0-9_]+: /) {
       key=$0
       sub(/:.*/, "", key)
-      if ((allowed_audit[key] || key ~ /^ISSUE_[0-9]+_(STATE|JOB_ID|POSTED)$/) && !seen["a:" key]++) {
-        print
+      if (allowed_audit[key] || key ~ /^ISSUE_[0-9]+_(STATE|JOB_ID|POSTED)$/) {
+        if (!audit_temp_seen[key]++) audit_temp_order[++audit_temp_n]=key
+        audit_temp[key]=$0
       }
     }
     next
@@ -47,7 +72,7 @@ awk '
     key=$0
     sub(/^- /, "", key)
     sub(/:.*/, "", key)
-    if (allowed_meta[key] && !seen["m:" key]++) print
+    if (allowed_meta[key] && !seen_meta[key]++) print
     next
   }
 
@@ -58,6 +83,12 @@ awk '
   }
 
   END {
+    if (audit_complete) {
+      for (i=1; i<=audit_final_n; i++) {
+        key=audit_final_order[i]
+        print audit_final[key]
+      }
+    }
     for (i=1; i<=nb; i++) if (status[b[i]] != "") print status[b[i]]
   }
 ' "${REPORT_FILE}"
