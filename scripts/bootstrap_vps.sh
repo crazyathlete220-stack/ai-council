@@ -20,7 +20,7 @@ REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 echo "Installing minimum packages..."
 apt-get update
-apt-get install -y git curl jq ca-certificates
+apt-get install -y git curl jq ca-certificates util-linux
 
 echo "Creating application and log directories..."
 install -d -m 0755 "${APP_DIR}"
@@ -61,6 +61,7 @@ SCRIPT_FILES=(
   "run_job_cycle.sh"
   "run_github_bridge_once.sh"
   "recover_github_bridge.sh"
+  "requeue_github_issue.sh"
   "job_status.sh"
   "report_job_result.sh"
   "run_ai_plan.sh"
@@ -130,6 +131,9 @@ GitHub bridge commands, after gh authentication is configured on the VPS:
 
 To restore and register a private workspace through an existing authenticated gh session:
   sudo bash ${APP_DIR}/scripts/recover_github_bridge.sh <REPO_NAME> <OWNER/REPOSITORY>
+
+To retry an imported failed/deferred Issue without creating a duplicate job:
+  sudo bash ${APP_DIR}/scripts/requeue_github_issue.sh <ISSUE_NUMBER>
 
 Claude Code readiness, before any manual install decision:
   bash ${APP_DIR}/scripts/claude_code_readiness.sh
