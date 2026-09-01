@@ -6,5 +6,6 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 WorkingDirectory=/opt/ai-council
-ExecStart=/opt/ai-council/scripts/run_job_once.sh
-
+Environment=HOME=/root
+Environment=XDG_CONFIG_HOME=/root/.config
+ExecStart=/opt/ai-council/scripts/run_job_cycle.sh
