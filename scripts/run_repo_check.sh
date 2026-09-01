@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REGISTRY_DIR="/etc/ai-council/workspaces.d"
+REGISTRY_DIR="${AI_COUNCIL_WORKSPACE_REGISTRY_DIR:-/etc/ai-council/workspaces.d}"
+OPERATOR_USER="${AI_COUNCIL_OPERATOR_USER:-ai-council}"
 errors=0
 
 usage() {
@@ -17,13 +18,21 @@ mark_skip() {
   echo "[SKIP] $1"
 }
 
+run_as_operator() {
+  if [[ "${EUID}" -eq 0 ]]; then
+    sudo -H -u "${OPERATOR_USER}" -- "$@"
+  else
+    "$@"
+  fi
+}
+
 run_step() {
   local label="$1"
   shift
 
   echo
   echo "### ${label}"
-  if "$@"; then
+  if run_as_operator "$@"; then
     echo "RESULT: OK"
   else
     local status="$?"
@@ -35,17 +44,14 @@ run_step() {
 has_npm_script() {
   local script_name="$1"
 
-  node -e 'const fs = require("fs"); const script = process.argv[1]; const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); const scripts = pkg.scripts || {}; process.exit(Object.prototype.hasOwnProperty.call(scripts, script) ? 0 : 1);' "${script_name}"
-}
-
-show_npm_scripts() {
-  echo
-  echo "### npm run script list"
-  if npm run; then
-    echo "RESULT: OK"
-  else
-    echo "RESULT: SKIP_OR_EMPTY"
-  fi
+  run_as_operator node -e '
+    const fs = require("fs");
+    const path = process.argv[1];
+    const script = process.argv[2];
+    const pkg = JSON.parse(fs.readFileSync(path, "utf8"));
+    const scripts = pkg.scripts || {};
+    process.exit(Object.prototype.hasOwnProperty.call(scripts, script) ? 0 : 1);
+  ' "${REPO_PATH}/package.json" "${script_name}"
 }
 
 if [[ "$#" -ne 1 ]]; then
@@ -60,11 +66,15 @@ if [[ ! "${requested_repo}" =~ ^[A-Za-z0-9._-]+$ ]]; then
   exit 1
 fi
 
+if ! id -u "${OPERATOR_USER}" >/dev/null 2>&1; then
+  echo "ERROR: operator user does not exist: ${OPERATOR_USER}" >&2
+  exit 1
+fi
+
 config_file="${REGISTRY_DIR}/${requested_repo}.env"
 if [[ ! -r "${config_file}" ]]; then
   echo "ERROR: workspace config is not readable: ${config_file}" >&2
   echo "Try: sudo bash scripts/register_workspace.sh ${requested_repo} /opt/ai-workspaces/${requested_repo}" >&2
-  echo "Then: sudo bash scripts/run_repo_check.sh ${requested_repo}" >&2
   exit 1
 fi
 
@@ -92,19 +102,11 @@ latest_report="${LOG_DIR}/latest-report.md"
 
 if ! mkdir -p "${run_dir}"; then
   echo "ERROR: could not create run log directory: ${run_dir}" >&2
-  echo "Try rerunning with sudo." >&2
   exit 1
 fi
 
-if ! : >"${run_log}"; then
-  echo "ERROR: could not write run log: ${run_log}" >&2
-  echo "Try rerunning with sudo." >&2
-  exit 1
-fi
-
-if ! : >"${latest_report}"; then
-  echo "ERROR: could not write latest report: ${latest_report}" >&2
-  echo "Try rerunning with sudo." >&2
+if ! : >"${run_log}" || ! : >"${latest_report}"; then
+  echo "ERROR: could not initialize repo check logs under ${LOG_DIR}" >&2
   exit 1
 fi
 
@@ -116,15 +118,14 @@ echo "- Generated At: ${report_timestamp}"
 echo "- Hostname: $(hostname)"
 echo "- Repo Name: ${REPO_NAME}"
 echo "- Repo Path: ${REPO_PATH}"
+echo "- Execution User: ${OPERATOR_USER}"
 echo "- Run Log: ${run_log}"
 echo
 
-cd "${REPO_PATH}"
-
 echo "## Git"
-if command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  echo "- Branch: $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
-  git_status="$(git status --short)"
+if command -v git >/dev/null 2>&1 && run_as_operator git -C "${REPO_PATH}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "- Branch: $(run_as_operator git -C "${REPO_PATH}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
+  git_status="$(run_as_operator git -C "${REPO_PATH}" status --short)"
   if [[ -z "${git_status}" ]]; then
     echo "- Working Tree: clean"
   else
@@ -134,32 +135,38 @@ if command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/n
     mark_error "working tree has uncommitted changes"
   fi
 else
-  mark_skip "git repository metadata not found"
+  mark_skip "git repository metadata not found or unreadable by ${OPERATOR_USER}"
 fi
 
 echo
 echo "## Node.js"
-if [[ -f package.json ]]; then
+if [[ -f "${REPO_PATH}/package.json" ]]; then
   echo "- package.json: found"
   if command -v npm >/dev/null 2>&1; then
     echo "- npm: $(command -v npm)"
-    show_npm_scripts
+    echo
+    echo "### npm run script list"
+    if run_as_operator npm --prefix "${REPO_PATH}" run; then
+      echo "RESULT: OK"
+    else
+      echo "RESULT: SKIP_OR_EMPTY"
+    fi
 
     if command -v node >/dev/null 2>&1; then
       if has_npm_script lint; then
-        run_step "npm run lint" npm run lint
+        run_step "npm run lint" npm --prefix "${REPO_PATH}" run lint
       else
         mark_skip "npm script lint not found"
       fi
 
       if has_npm_script test; then
-        run_step "npm test" npm test
+        run_step "npm test" npm --prefix "${REPO_PATH}" test
       else
         mark_skip "npm script test not found"
       fi
 
       if has_npm_script build; then
-        run_step "npm run build" npm run build
+        run_step "npm run build" npm --prefix "${REPO_PATH}" run build
       else
         mark_skip "npm script build not found"
       fi
@@ -175,11 +182,11 @@ fi
 
 echo
 echo "## Python"
-if [[ -f pyproject.toml || -f requirements.txt ]]; then
+if [[ -f "${REPO_PATH}/pyproject.toml" || -f "${REPO_PATH}/requirements.txt" ]]; then
   if command -v python3 >/dev/null 2>&1; then
     echo "- python3: $(command -v python3)"
-    python3 --version
-    if python3 -m pytest --version >/dev/null 2>&1; then
+    run_as_operator python3 --version
+    if run_as_operator python3 -m pytest --version >/dev/null 2>&1; then
       echo "- pytest candidate: python3 -m pytest"
       echo "- pytest execution: optional in this phase"
     else

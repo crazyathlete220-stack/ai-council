@@ -14,6 +14,13 @@ jobs:
       - name: Check shell syntax
         run: bash -n scripts/*.sh
 
+      - name: Test bridge recovery paths
+        run: |
+          bash scripts/test_bridge_recovery.sh
+          bash scripts/test_stale_active_recovery.sh
+          bash scripts/test_recovery_regressions.sh
+          sudo bash scripts/test_importer_preflight.sh
+
       - name: Check required files
         run: |
           test -f README.md
@@ -24,6 +31,7 @@ jobs:
           test -f docs/vps-ai-operator.md
           test -f docs/vps-job-inbox.md
           test -f docs/vps-github-bridge.md
+          test -f docs/vps-bridge-recovery.md
           test -f docs/mobile-vps-jobs.md
           test -f docs/vps-ai-worker.md
           test -f docs/vps-ai-cli-runner.md
@@ -37,6 +45,14 @@ jobs:
           test -f scripts/setup_operator_user.sh
           test -f scripts/create_job.sh
           test -f scripts/run_job_once.sh
+          test -f scripts/run_job_cycle.sh
+          test -f scripts/run_github_bridge_once.sh
+          test -f scripts/recover_github_bridge.sh
+          test -f scripts/requeue_github_issue.sh
+          test -f scripts/test_bridge_recovery.sh
+          test -f scripts/test_stale_active_recovery.sh
+          test -f scripts/test_recovery_regressions.sh
+          test -f scripts/test_importer_preflight.sh
           test -f scripts/job_status.sh
           test -f scripts/report_job_result.sh
           test -f scripts/run_ai_plan.sh

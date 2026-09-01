@@ -17,12 +17,26 @@ count_jobs() {
   echo "${#files[@]}"
 }
 
+count_pending_posts() {
+  local files=()
+
+  if [[ -d "${LOG_DIR}/pending-posts" ]]; then
+    shopt -s nullglob
+    files=("${LOG_DIR}/pending-posts"/*.md)
+    shopt -u nullglob
+  fi
+
+  echo "${#files[@]}"
+}
+
 echo "AI Council job inbox status"
 echo
 echo "- queue: $(count_jobs "${JOB_ROOT}/queue")"
 echo "- active: $(count_jobs "${JOB_ROOT}/active")"
 echo "- done: $(count_jobs "${JOB_ROOT}/done")"
 echo "- failed: $(count_jobs "${JOB_ROOT}/failed")"
+echo "- deferred: $(count_jobs "${JOB_ROOT}/deferred")"
+echo "- pending GitHub posts: $(count_pending_posts)"
 echo "- job root: ${JOB_ROOT}"
 echo "- log dir: ${LOG_DIR}"
 
@@ -38,7 +52,25 @@ else
   echo "- latest-summary.md: no"
 fi
 
-if [[ -d "${JOB_ROOT}/queue" && -d "${JOB_ROOT}/active" && -d "${JOB_ROOT}/done" && -d "${JOB_ROOT}/failed" ]]; then
+required_dirs=(
+  "${JOB_ROOT}/queue"
+  "${JOB_ROOT}/active"
+  "${JOB_ROOT}/done"
+  "${JOB_ROOT}/failed"
+  "${JOB_ROOT}/deferred"
+  "${LOG_DIR}/reports"
+  "${LOG_DIR}/pending-posts"
+)
+
+missing=0
+for required_dir in "${required_dirs[@]}"; do
+  if [[ ! -d "${required_dir}" ]]; then
+    echo "- missing directory: ${required_dir}"
+    missing=1
+  fi
+done
+
+if [[ "${missing}" -eq 0 ]]; then
   echo
   echo "JOB_INBOX_STATUS: OK"
 else
@@ -46,4 +78,3 @@ else
   echo "JOB_INBOX_STATUS: ERROR"
   exit 1
 fi
-

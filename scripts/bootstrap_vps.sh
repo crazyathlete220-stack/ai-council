@@ -20,7 +20,7 @@ REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 echo "Installing minimum packages..."
 apt-get update
-apt-get install -y git curl jq ca-certificates
+apt-get install -y git curl jq ca-certificates util-linux
 
 echo "Creating application and log directories..."
 install -d -m 0755 "${APP_DIR}"
@@ -40,6 +40,7 @@ DOC_FILES=(
   "vps-ai-operator.md"
   "vps-job-inbox.md"
   "vps-github-bridge.md"
+  "vps-bridge-recovery.md"
   "mobile-vps-jobs.md"
   "vps-ai-worker.md"
   "vps-ai-cli-runner.md"
@@ -58,6 +59,10 @@ SCRIPT_FILES=(
   "setup_operator_user.sh"
   "create_job.sh"
   "run_job_once.sh"
+  "run_job_cycle.sh"
+  "run_github_bridge_once.sh"
+  "recover_github_bridge.sh"
+  "requeue_github_issue.sh"
   "job_status.sh"
   "report_job_result.sh"
   "run_ai_plan.sh"
@@ -92,7 +97,7 @@ for systemd_file in "${SYSTEMD_FILES[@]}"; do
   install -m 0644 "${REPO_DIR}/systemd/${systemd_file}" "/etc/systemd/system/${systemd_file}"
 done
 
-echo "Reloading systemd and enabling timer..."
+echo "Reloading systemd and enabling healthcheck timer..."
 systemctl daemon-reload
 systemctl enable --now "${TIMER_NAME}"
 
@@ -115,8 +120,7 @@ Phase 3 operator commands, after review:
   sudo bash ${APP_DIR}/scripts/setup_ai_cli_runner.sh ai-council
   bash ${APP_DIR}/scripts/ai_cli_status.sh ai-council
   bash ${APP_DIR}/scripts/create_job.sh ai_exec ai-council
-  sudo bash ${APP_DIR}/scripts/run_job_once.sh
-  sudo bash ${APP_DIR}/scripts/report_job_result.sh
+  sudo bash ${APP_DIR}/scripts/run_job_cycle.sh
   sudo systemctl enable --now ${JOB_TIMER_NAME}
 
 GitHub bridge commands, after gh authentication is configured on the VPS:
@@ -124,9 +128,16 @@ GitHub bridge commands, after gh authentication is configured on the VPS:
   printf '%s\n' '<GITHUB_USERNAME>' | sudo tee /etc/ai-council/github-bridge-allowlist >/dev/null
   sudo chmod 0644 /etc/ai-council/github-bridge-allowlist
   bash ${APP_DIR}/scripts/github_bridge_timer.sh status
-  sudo bash ${APP_DIR}/scripts/import_github_jobs.sh
-  sudo bash ${APP_DIR}/scripts/post_job_result_to_github.sh
-  sudo bash ${APP_DIR}/scripts/github_bridge_timer.sh enable
+  sudo bash ${APP_DIR}/scripts/recover_github_bridge.sh
+
+To restore and register a private workspace through an existing authenticated gh session:
+  sudo bash ${APP_DIR}/scripts/recover_github_bridge.sh <REPO_NAME> <OWNER/REPOSITORY>
+
+To retry an imported failed/deferred Issue without creating a duplicate job:
+  sudo bash ${APP_DIR}/scripts/requeue_github_issue.sh <ISSUE_NUMBER>
+
+Full recovery runbook:
+  ${APP_DIR}/docs/vps-bridge-recovery.md
 
 Claude Code readiness, before any manual install decision:
   bash ${APP_DIR}/scripts/claude_code_readiness.sh
