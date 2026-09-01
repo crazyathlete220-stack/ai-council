@@ -29,6 +29,7 @@ jobs:
           test -f docs/vps-ai-operator.md
           test -f docs/vps-job-inbox.md
           test -f docs/vps-github-bridge.md
+          test -f docs/vps-bridge-recovery.md
           test -f docs/mobile-vps-jobs.md
           test -f docs/vps-ai-worker.md
           test -f docs/vps-ai-cli-runner.md
