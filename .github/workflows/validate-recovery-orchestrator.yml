@@ -1,0 +1,39 @@
+name: Validate Recovery Orchestrator
+
+on:
+  pull_request:
+    paths:
+      - "scripts/recover_private_workspace.sh"
+      - ".github/workflows/validate-recovery-orchestrator.yml"
+  push:
+    paths:
+      - "scripts/recover_private_workspace.sh"
+      - ".github/workflows/validate-recovery-orchestrator.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Shell syntax
+        run: bash -n scripts/recover_private_workspace.sh
+
+      - name: Bounded preflight
+        env:
+          AI_COUNCIL_RECOVERY_MIN_PUBLIC_COMMIT: ${{ github.sha }}
+        run: bash scripts/recover_private_workspace.sh --check
+
+      - name: Verify safety stops
+        run: |
+          grep -q 'workspace is dirty' scripts/recover_private_workspace.sh
+          grep -q 'root GitHub CLI authentication is unavailable' scripts/recover_private_workspace.sh
+          grep -q 'pull --ff-only' scripts/recover_private_workspace.sh
+          grep -q 'requeue_github_issue.sh' scripts/recover_private_workspace.sh
+          grep -q 'NEXT_SAFE_ACTION' scripts/recover_private_workspace.sh
+          ! grep -q 'reset --hard' scripts/recover_private_workspace.sh
+          ! grep -q 'clean -fd' scripts/recover_private_workspace.sh
