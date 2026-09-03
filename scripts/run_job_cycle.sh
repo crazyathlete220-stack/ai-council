@@ -63,13 +63,16 @@ if [[ -n "${report_path}" && -r "${report_path}" ]]; then
     contract_output=""
     contract_exit=22
 
-    if [[ -x "${CLASSIFIER}" ]]; then
+    # The classifier is invoked through bash. Source checkouts created by the
+    # GitHub Contents API can carry mode 0644, while runtime-manifest install
+    # applies 0755. Readability is the correct cross-environment prerequisite.
+    if [[ -r "${CLASSIFIER}" ]]; then
       set +e
       contract_output="$(bash "${CLASSIFIER}" "${last_message}" 2>&1)"
       contract_exit=$?
       set -e
     else
-      contract_output=$'AI_EXEC_RESULT_CONTRACT_STATUS: INDETERMINATE\nAI_EXEC_RESULT_MARKER: MISSING_CLASSIFIER\nAI_EXEC_RESULT_REASON: classifier_not_executable'
+      contract_output=$'AI_EXEC_RESULT_CONTRACT_STATUS: INDETERMINATE\nAI_EXEC_RESULT_MARKER: MISSING_CLASSIFIER\nAI_EXEC_RESULT_REASON: classifier_not_readable'
     fi
 
     contract_status="$(printf '%s\n' "${contract_output}" | awk -F': ' '/^AI_EXEC_RESULT_CONTRACT_STATUS: /{print $2; exit}')"
