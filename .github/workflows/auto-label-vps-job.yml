@@ -16,6 +16,46 @@ jobs:
       contains(github.event.issue.body, 'REPO_NAME=')
     runs-on: ubuntu-latest
     steps:
+      - name: Attach ai_exec result contract
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          body_file="$RUNNER_TEMP/issue-body.md"
+          gh issue view "$ISSUE_NUMBER" --repo "$REPOSITORY" --json body --jq '.body // ""' > "$body_file"
+
+          if grep -Fq '<!-- AI_COUNCIL_RESULT_CONTRACT_V1 -->' "$body_file"; then
+            exit 0
+          fi
+
+          job_type="$(awk -F= '/^JOB_TYPE=/{print $2; exit}' "$body_file" | tr -d '[:space:]')"
+          if [ "$job_type" != "ai_exec" ]; then
+            exit 0
+          fi
+
+          cat >> "$body_file" <<'EOF_CONTRACT'
+
+          <!-- AI_COUNCIL_RESULT_CONTRACT_V1 -->
+          ## AI Council result contract
+
+          Report only actions and evidence that actually occurred. Choose exactly one result marker:
+
+          - `AI_EXEC_RESULT: SUCCESS` only when all requested completion conditions have evidence.
+          - `AI_EXEC_RESULT: BLOCKED` when a permission, safety, dependency, account, or external condition prevents completion.
+          - `AI_EXEC_RESULT: FAILED` when execution was attempted but failed.
+
+          Do not reproduce all marker options in the final response. Put the chosen marker outside code blocks as the final non-empty line, with no text after it.
+          EOF_CONTRACT
+
+          body_bytes="$(wc -c < "$body_file" | tr -d '[:space:]')"
+          if [ "$body_bytes" -gt 12000 ]; then
+            gh issue comment "$ISSUE_NUMBER" --repo "$REPOSITORY" --body "RESULT_CONTRACT_BLOCKED: ai_exec Issue body would exceed the 12000-byte runtime input boundary. Shorten the request before dispatch."
+            exit 1
+          fi
+
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPOSITORY" --body-file "$body_file"
+
       - name: Ensure and apply dispatch label
         env:
           GH_TOKEN: ${{ github.token }}

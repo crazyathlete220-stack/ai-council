@@ -17,6 +17,7 @@ doc|docs/vps-codex-direct.md|0644
 doc|docs/vps-claude-code.md|0644
 doc|docs/durable-job-lifecycle.md|0644
 doc|docs/runtime-audit-profile.md|0644
+doc|docs/ai-exec-result-contract.md|0644
 
 script|scripts/bootstrap_vps.sh|0755
 script|scripts/healthcheck.sh|0755
@@ -30,6 +31,7 @@ script|scripts/setup_operator_user.sh|0755
 script|scripts/create_job.sh|0755
 script|scripts/run_job_once.sh|0755
 script|scripts/run_job_cycle.sh|0755
+script|scripts/classify_ai_exec_result.sh|0755
 script|scripts/job_status.sh|0755
 script|scripts/extract_job_signals.sh|0755
 script|scripts/report_job_result.sh|0755
