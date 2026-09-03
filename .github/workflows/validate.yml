@@ -80,5 +80,8 @@ jobs:
           test -f tests/test_ai_check_audit_wrapper.sh
           test -f tests/test_ai_exec_result_contract.sh
 
+      - name: Check runtime manifest bundle
+        run: bash scripts/install_runtime_files.sh --check
+
       - name: Run lifecycle, audit, and result-contract tests
         run: bash tests/run.sh
